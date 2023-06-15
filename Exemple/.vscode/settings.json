@@ -1,0 +1,20 @@
+{
+  "files.encoding": "utf8",
+  "cmake" : {
+    "buildArgs" : [ //Замедляет компиляцию
+      // "-v",
+    ]
+  },
+
+  "files.associations": {
+    "*.c": "c",
+    "*.h": "c",
+    "*.S": "c",
+    "*.cpp": "cpp"
+  },
+  "search.exclude": {
+    "build": true,
+  },
+  "cortex-debug.registerUseNaturalFormat": false,
+  "cortex-debug.variableUseNaturalFormat": false,
+}

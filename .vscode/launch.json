@@ -1,0 +1,44 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Test1 Linux",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/Tests/Debug/testArp",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            }
+            ]
+        },
+
+        // jlink
+        {
+          "name": "jlink",
+          "type": "cortex-debug",
+          "request": "launch",
+          "cwd": "${workspaceRoot}",
+          "executable": "./Exemple/Debug/test_ETH.elf",
+          "serverpath": "C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe",
+          "servertype": "jlink",
+          "device": "STM32F746ZGTx",
+          "interface": "swd",
+          "runToEntryPoint": "main",
+          "svdFile": "./Exemple/STM32F746.svd",
+          },
+
+    ]
+}

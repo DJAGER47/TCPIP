@@ -1,0 +1,7 @@
+build
+Debug
+
+*.state.json
+
+Exemple/TCPIP
+Tests/TCPIP
