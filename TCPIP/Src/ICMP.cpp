@@ -3,22 +3,21 @@
 #include "ICMP.h"
 
 // #include <stdio.h>
-// #include "FCS.h"
 #include "IPv4.h"
 #include "Utility.h"
-
+#include "InterfaceBuffer.h"
 
 namespace TCPIP
 {
-    void ICMP::ProcessRx(DataBuffer *buffer, const uint8_t *remoteIP, const uint8_t *)
+    void ICMP::ProcessRx(const EthBuff *buffer, const uint8_t *remoteIP, const uint8_t *)
     {
         uint8_t type;
-        uint8_t code;
-        DataBuffer *txBuffer;
-        uint16_t i;
+        // uint8_t code;
+        // const EthBuff *txBuffer;
+        // uint16_t i;
 
-        type = buffer->Packet[0];
-        code = buffer->Packet[1];
+        type = buffer->buff[0];
+        // code = buffer->Packet[1];
 
         switch (type)
         {

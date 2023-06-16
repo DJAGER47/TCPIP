@@ -11,6 +11,7 @@
 #ifdef RTT
 	#include "SEGGER_RTT.h"
 	#define _printf(...) SEGGER_RTT_printf(0, __VA_ARGS__)
+    #define OFFSET_BUF_RTT __attribute__((section(".rtt")))
 #endif
 #ifdef SWO
 	#define _printf(...) printf(__VA_ARGS__)

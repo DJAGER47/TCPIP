@@ -22,7 +22,6 @@ include(${ProjDirPath}/flags.cmake)
 # THE NEED BUILD SOURCE PATH AND BUILD ALL FILES
 set ( SRC 
   ${ProjDirPath}/main.c
-  # ${ProjDirPath}/Src/startup_stm32f746zgtx.s
   ${ProjDirPath}/Src/startup_stm32f746xx.s
   ${ProjDirPath}/Src/stm32f7xx_it.c
   ${ProjDirPath}/Src/stm32f7xx_hal_timebase_tim.c
@@ -30,6 +29,7 @@ set ( SRC
   ${ProjDirPath}/lan8742/lan8742.c
   ${ProjDirPath}/Src/phy.c
   
+  ${ProjDirPath}/Src/DefaultStack.cpp
   ${ProjDirPath}/Src/ethernetif.cpp
 )
 # GENERATE THE TARGET
@@ -47,8 +47,8 @@ target_compile_options(${EXECUTABLE} PRIVATE
   -Wall
   -Wextra
   # -Werror
-  # -pedantic
-  # -Wconversion
+  -pedantic
+  -Wconversion
   -ffunction-sections # Каждая функция в отдельной секции в elf
   -fdata-sections     # Каждая переменная в отдельной секции в elf
   -fstack-usage       # Генерирует su файлы для анализа стека
@@ -80,12 +80,14 @@ set(CMAKE_MODULE_PATH
   ${ProjDirPath}/Drivers/STM32F7xx_HAL_Driver/
   ${ProjDirPath}/Drivers/FreeRTOS
   ${ProjDirPath}/RTT/
+  ${ProjDirPath}/TCPIP/
 )
 
 # include modules
 include(_hal_ll_f7_FR)
 include(_debug)
 include(_free_rtos)
+include(_tcp_ip)
 
 
 set_target_properties(${EXECUTABLE} PROPERTIES C_STANDARD   11)

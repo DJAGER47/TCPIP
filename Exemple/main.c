@@ -2,14 +2,6 @@
 #include "cmsis_os.h"
 #include "ethernetif.h"
 
-// 30 24 A9 87 3E 01 notebook
-
-    // #define  IP_UnicastAddress    192, 168, 0, 20
-    // #define MAC_UnicastAddress    0x00, 0x80, 0xE1, 0x00, 0x00, 0x00
-
-    // #define  IP_PC_UnicastAddress 192, 168, 0, 40
-    // #define MAC_PC_UnicastAddress 0x30, 0x24, 0xA9, 0x87, 0x3E, 0x01
-
 static void SystemClock_Config(void);
 
 int main(void)

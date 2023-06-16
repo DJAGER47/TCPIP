@@ -14,14 +14,14 @@ namespace TCPIP
 
     // IPv4::IPv4(InterfaceMAC &mac, ARP &arp, ICMP &icmp)
     //     : PacketID(0)
-    //       // , UnresolvedQueue("IP", TX_BUFFER_COUNT, TxBuffer)
+    //       // , UnresolvedQueue("IP", 20, TxBuffer)
     //       ,
     //       address_(), mac_(mac), arp_(arp), icmp_(icmp)
     // {
     //     address_.DataValid = false;
     // }
 
-    void IPv4::ProcessRx(DataBuffer *buffer)
+    void IPv4::ProcessRx(EthBuff *buffer)
     {
         // uint8_t headerLength;
         // uint8_t protocol;
@@ -53,9 +53,9 @@ namespace TCPIP
         // }
     }
 
-    // DataBuffer *IPv4::GetTxBuffer(InterfaceMAC *mac)
+    // const EthBuff *IPv4::GetTxBuffer(InterfaceMAC *mac)
     // {
-    //     DataBuffer *buffer;
+    //     const EthBuff *buffer;
 
     //     // buffer = mac->GetTxBuffer();
     //     // if (buffer != nullptr)
@@ -67,7 +67,7 @@ namespace TCPIP
     //     return buffer;
     // }
 
-    // void IPv4::Transmit(DataBuffer *buffer,
+    // void IPv4::Transmit(const EthBuff *buffer,
     //                     uint8_t protocol,
     //                     const uint8_t *targetIP,
     //                     const uint8_t *sourceIP)
@@ -110,7 +110,7 @@ namespace TCPIP
     //     // }
     // }
 
-    // void IPv4::Retransmit(DataBuffer *buffer)
+    // void IPv4::Retransmit(const EthBuff *buffer)
     // {
     //     // mac_.Retransmit(buffer);
     // }
@@ -118,13 +118,13 @@ namespace TCPIP
     // void IPv4::Retry()
     //{
         // int count;
-        // DataBuffer* buffer;
+        // const EthBuff* buffer;
         // const uint8_t* targetMAC;
 
         // count = UnresolvedQueue.GetCount();
         // for (int i = 0; i < count; i++)
         // {
-        //     buffer = (DataBuffer*)UnresolvedQueue.Get();
+        //     buffer = (const EthBuff*)UnresolvedQueue.Get();
 
         //     targetMAC = arp_.Protocol2Hardware(&buffer->Packet[16]);
         //     if (targetMAC != nullptr)
@@ -133,18 +133,18 @@ namespace TCPIP
         //     }
         //     else
         //     {
-        //         log_._printf("Still could not find mac_ for IP\n");
+        //         log_.print_log("Still could not find mac_ for IP\n");
         //         UnresolvedQueue.Put(buffer);
         //     }
         // }
     //}
 
-    // void IPv4::FreeTxBuffer(DataBuffer *buffer)
+    // void IPv4::FreeTxBuffer(const EthBuff *buffer)
     // {
     //     // mac_.FreeTxBuffer(buffer);
     // }
 
-    // void IPv4::FreeRxBuffer(DataBuffer *buffer)
+    // void IPv4::FreeRxBuffer(const EthBuff *buffer)
     // {
     //     // mac_.FreeRxBuffer(buffer);
     // }

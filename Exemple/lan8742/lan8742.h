@@ -374,11 +374,11 @@
 /** @defgroup LAN8742_Exported_Types LAN8742 Exported Types
   * @{
   */
-typedef int32_t  (*lan8742_Init_Func) (void); 
-typedef int32_t  (*lan8742_DeInit_Func) (void);
-typedef int32_t  (*lan8742_ReadReg_Func)   (uint32_t, uint32_t, uint32_t *);
-typedef int32_t  (*lan8742_WriteReg_Func)  (uint32_t, uint32_t, uint32_t);
-typedef int32_t  (*lan8742_GetTick_Func)  (void);
+typedef int32_t   (*lan8742_Init_Func)      (void); 
+typedef int32_t   (*lan8742_DeInit_Func)    (void);
+typedef int32_t   (*lan8742_ReadReg_Func)   (uint32_t, uint32_t, uint32_t *);
+typedef int32_t   (*lan8742_WriteReg_Func)  (uint32_t, uint32_t, uint32_t);
+typedef uint32_t  (*lan8742_GetTick_Func)   (void);
 
 typedef struct 
 {                   

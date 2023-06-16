@@ -1,0 +1,26 @@
+CMAKE_MINIMUM_REQUIRED (VERSION 3.10.0)
+
+project( UNION )
+
+# add_subdirectory(Exemple)
+# add_subdirectory(Tests)
+
+# SET(CMAKE_TOOLCHAIN_FILE "armgcc.cmake" CACHE PATH "toolchain file")
+
+# C:/Users/p.lavrovskiy/YandexDisk/Praktikum/yandex_tests/Task/Exemple/
+execute_process(
+  COMMAND 
+  ${CMAKE_COMMAND}
+  -G "Unix Makefiles" 
+  -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/Exemple/armgcc.cmake
+  -S .
+  -B ./cache
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Exemple
+)
+
+# cmake --build ./cache --parallel 16 
+execute_process( COMMAND 
+  ${CMAKE_COMMAND} --build ./cache 
+  --parallel 16
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Exemple
+)

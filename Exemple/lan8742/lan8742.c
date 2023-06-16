@@ -217,7 +217,7 @@ int32_t LAN8742_DisablePowerDownMode(lan8742_Object_t *pObj)
   
   if(pObj->IO.ReadReg(pObj->DevAddr, LAN8742_BCR, &readval) >= 0)
   {
-    readval &= ~LAN8742_BCR_POWER_DOWN;
+    readval &= ~((uint32_t)LAN8742_BCR_POWER_DOWN);
   
     /* Apply configuration */
     if(pObj->IO.WriteReg(pObj->DevAddr, LAN8742_BCR, readval) < 0)
@@ -406,7 +406,7 @@ int32_t LAN8742_SetLinkState(lan8742_Object_t *pObj, uint32_t LinkState)
   if(pObj->IO.ReadReg(pObj->DevAddr, LAN8742_BCR, &bcrvalue) >= 0)
   {
     /* Disable link config (Auto nego, speed and duplex) */
-    bcrvalue &= ~(LAN8742_BCR_AUTONEGO_EN | LAN8742_BCR_SPEED_SELECT | LAN8742_BCR_DUPLEX_MODE);
+    bcrvalue &= ~((uint32_t)(LAN8742_BCR_AUTONEGO_EN | LAN8742_BCR_SPEED_SELECT | LAN8742_BCR_DUPLEX_MODE));
     
     if(LinkState == LAN8742_STATUS_100MBITS_FULLDUPLEX)
     {
@@ -487,7 +487,7 @@ int32_t LAN8742_DisableLoopbackMode(lan8742_Object_t *pObj)
   
   if(pObj->IO.ReadReg(pObj->DevAddr, LAN8742_BCR, &readval) >= 0)
   {
-    readval &= ~LAN8742_BCR_LOOPBACK;
+    readval &= ~((uint32_t)LAN8742_BCR_LOOPBACK);
   
     /* Apply configuration */
     if(pObj->IO.WriteReg(pObj->DevAddr, LAN8742_BCR, readval) < 0)

@@ -17,4 +17,5 @@
   },
   "cortex-debug.registerUseNaturalFormat": false,
   "cortex-debug.variableUseNaturalFormat": false,
+  "editor.tabSize": 4,
 }

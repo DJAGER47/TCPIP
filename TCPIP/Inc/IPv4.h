@@ -6,7 +6,6 @@
 #include <cstddef>
 #include <array>
 
-#include "DataBuffer.h"
 #include "InterfaceIP.h"
 
 // #include "ARP.h"
@@ -30,17 +29,17 @@ namespace TCPIP
 
         IPv4(){};
         // IPv4() = delete;
-        IPv4(IPv4 &) = delete;
+        // IPv4(IPv4 &) = delete;
         // IPv4(InterfaceMAC &mac, ARP &arp, ICMP &icmp);
-        void ProcessRx(DataBuffer *);
-        // DataBuffer *GetTxBuffer(InterfaceMAC *);
-        // void Transmit(DataBuffer *, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP);
-        // void Retransmit(DataBuffer *);
+        void ProcessRx(EthBuff *);
+        // const EthBuff *GetTxBuffer(InterfaceMAC *);
+        // void Transmit(const EthBuff *, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP);
+        // void Retransmit(const EthBuff *);
         // void Retry();
 
-        // void FreeTxBuffer(DataBuffer *);
-        // void FreeRxBuffer(DataBuffer *);
-        static size_t GetHeaderSize() { return HEADER_SIZE; }
+        // void FreeTxBuffer(const EthBuff *);
+        // void FreeRxBuffer(const EthBuff *);
+        size_t GetHeaderSize() const { return HEADER_SIZE; }
         size_t GetAddressSize() const { return ADDRESS_SIZE; }
         const uint8_t *GetUnicastAddress() const { return address_.Address; }
         const uint8_t *GetGatewayAddress() const { return address_.Gateway; }
@@ -68,7 +67,7 @@ namespace TCPIP
         // bool IsLocal(const uint8_t *addr);
 
         // uint16_t PacketID;
-        // void *TxBuffer[TX_BUFFER_COUNT];
+        // void *TxBuffer[20];
         // osQueue UnresolvedQueue;
 
         AddressIP4Settings address_;

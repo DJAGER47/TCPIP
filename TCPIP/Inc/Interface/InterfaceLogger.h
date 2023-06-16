@@ -7,11 +7,12 @@ namespace TCPIP
     public:
         enum Type
         {
+            INFO,
             WARNING,
             ERROR
         };
 
         virtual ~InterfaceLogger() {}
-        virtual int _printf(Type type, const char *sFormat, ...) = 0;
+        virtual int print_log(Type type, const char *sFormat, ...) = 0;
     };
 }

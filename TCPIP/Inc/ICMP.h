@@ -3,8 +3,8 @@
 #pragma once
 
 #include <cstdint>
-#include "DataBuffer.h"
 #include "IPv4.h"
+#include "InterfaceBuffer.h"
 
 namespace TCPIP
 {
@@ -14,7 +14,7 @@ namespace TCPIP
         ICMP() = delete;
         ICMP(ICMP &) = delete;
         ICMP(IPv4 &ip) : IP(ip) {};
-        void ProcessRx(DataBuffer *, const uint8_t *sourceIP, const uint8_t *targetIP);
+        void ProcessRx(const EthBuff *, const uint8_t *sourceIP, const uint8_t *targetIP);
 
     private:
         enum

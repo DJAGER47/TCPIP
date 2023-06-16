@@ -26,7 +26,7 @@
  *  
  *----------------------------------------------------------------------------
  *
- * Portions Copyright © 2016 STMicroelectronics International N.V. All rights reserved.
+ * Portions Copyright ï¿½ 2016 STMicroelectronics International N.V. All rights reserved.
  * Portions Copyright (c) 2013 ARM LIMITED
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
@@ -287,6 +287,8 @@ osStatus osThreadSetPriority (osThreadId thread_id, osPriority priority)
   vTaskPrioritySet(thread_id, makeFreeRtosPriority(priority));
   return osOK;
 #else
+  UNUSED(thread_id);
+  UNUSED(priority);
   return osErrorOS;
 #endif
 }
@@ -309,6 +311,7 @@ osPriority osThreadGetPriority (osThreadId thread_id)
     return makeCmsisPriority(uxTaskPriorityGet(thread_id));
   }
 #else
+  UNUSED(thread_id);
   return osPriorityError;
 #endif
 }

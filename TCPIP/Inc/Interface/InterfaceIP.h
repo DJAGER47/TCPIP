@@ -1,5 +1,7 @@
 #pragma once
 
+#include "InterfaceBuffer.h"
+
 namespace TCPIP
 {
     class InterfaceIP
@@ -7,19 +9,19 @@ namespace TCPIP
     public:
         virtual ~InterfaceIP() {}
 
-        virtual void ProcessRx(DataBuffer *) = 0;
-        // DataBuffer *GetTxBuffer(InterfaceMAC *);
-        // void Transmit(DataBuffer *, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP);
-        // void Retransmit(DataBuffer *);
+        virtual void ProcessRx(EthBuff *) = 0;
+        // const EthBuff *GetTxBuffer(InterfaceMAC *);
+        // void Transmit(const EthBuff *, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP);
+        // void Retransmit(const EthBuff *);
         // void Retry();
 
-        // void FreeTxBuffer(DataBuffer *);
-        // void FreeRxBuffer(DataBuffer *);
-        // static size_t GetHeaderSize() { return HEADER_SIZE; }
+        // void FreeTxBuffer(const EthBuff *);
+        // void FreeRxBuffer(const EthBuff *);
+        virtual size_t GetHeaderSize() const = 0;
         virtual size_t GetAddressSize() const = 0;
         virtual const uint8_t *GetUnicastAddress() const = 0;
         virtual const uint8_t *GetGatewayAddress() const  = 0;
         virtual const uint8_t *GetSubnetMask() const = 0;
-        virtual void SetAddressInfo(const AddressIP4Settings &info) = 0;
+        // virtual void SetAddressInfo(const AddressIP4Settings &info) = 0;
     };
 }

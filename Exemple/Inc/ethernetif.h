@@ -4,10 +4,7 @@
 extern "C" {
 #endif
 
-#include "cmsis_os.h"
-
-/* Exported types ------------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
+#include "stm32f7xx_hal.h"
 
 void low_level_init(void);
 

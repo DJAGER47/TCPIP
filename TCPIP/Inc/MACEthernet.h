@@ -2,65 +2,60 @@
 
 #include <cstdint>
 
-#include "DataBuffer.h"
 #include "InterfaceMAC.h"
-#include "osEvent.h"
-#include "osQueue.h"
+#include "InterfaceIP.h"
+#include "ARP.h"
 
 namespace TCPIP
 {
-
-    class ARP;
-    class IPv4;
-
     class MACEthernet : public InterfaceMAC
     {
+    private:
+        static const int HEADER_SIZE = 14;
+        static const int ADDRESS_SIZE = 6;
+
     public:
-        MACEthernet(ARP &, IPv4 &);
-        void RegisterDataTransmitHandler(DataTransmitHandler);
 
-        void ProcessRx(uint8_t *buffer, int length);
+        MACEthernet() = delete;
+        MACEthernet(MACEthernet &) = delete;
+        MACEthernet(ARP &arp,InterfaceIP &ipv4, InterfaceLogger &log);
 
-        void Transmit(DataBuffer *, const uint8_t *targetMAC, uint16_t type);
-        void Retransmit(DataBuffer *buffer);
+        size_t GetHeaderSize() const { return HEADER_SIZE; };
+        size_t GetAddressSize() const { return ADDRESS_SIZE; };
 
-        DataBuffer *GetTxBuffer();
-        void FreeTxBuffer(DataBuffer *);
-        void FreeRxBuffer(DataBuffer *);
+        const uint8_t *GetUnicastAddress() const { return UnicastAddress; };
+        const uint8_t *GetBroadcastAddress() const { return BroadcastAddress; };
 
-        size_t GetAddressSize() const;
-        size_t HeaderSize() const;
+        void RegisterDataTransmitHandler(DataTransmitHandler handler) { TxHandler = handler; };
+        void ProcessRx(const EthBuff *buffer);
+        void Transmit(const EthBuff *, const uint8_t *targetMAC, uint16_t type);
+        void Retransmit(const EthBuff *buffer);
 
-        const uint8_t *GetUnicastAddress() const;
-        const uint8_t *GetBroadcastAddress() const;
+        // const EthBuff *GetTxBuffer();
+        // void FreeTxBuffer(const EthBuff *);
+        // void FreeRxBuffer(const EthBuff *);
 
-        void SetUnicastAddress(uint8_t *addr);
-        static size_t GetHeaderSize() { return 14; }
+        void SetUnicastAddress(const uint8_t *addr);
 
     private:
-        static const int ADDRESS_SIZE = 6;
-        osQueue TxBufferQueue;
-        osQueue RxBufferQueue;
-
-        osEvent QueueEmptyEvent;
-
         uint8_t UnicastAddress[ADDRESS_SIZE];
         uint8_t BroadcastAddress[ADDRESS_SIZE];
 
-        DataBuffer TxBuffer[TX_BUFFER_COUNT];
-        DataBuffer RxBuffer[RX_BUFFER_COUNT];
-
-        void *TxBufferBuffer[TX_BUFFER_COUNT];
-        void *RxBufferBuffer[RX_BUFFER_COUNT];
-
         DataTransmitHandler TxHandler;
-        ARP &ARP;
-        IPv4 &IPv4;
+        ARP &arp_;
+        InterfaceIP &ipv4_;
+        InterfaceLogger &log_;
 
-        bool IsLocalAddress(const uint8_t *addr);
+        bool IsThisMyAddress(const uint8_t *addr);
 
-        MACEthernet(MACEthernet &);
-        MACEthernet();
+        // osQueue TxBufferQueue;
+        // osQueue RxBufferQueue;
+        // osEvent QueueEmptyEvent;
+
+        // const EthBuff TxBuffer[20];
+        // const EthBuff RxBuffer[20];
+
+        // void *TxBufferBuffer[20];
+        // void *RxBufferBuffer[20];
     };
-
 }

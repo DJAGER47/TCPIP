@@ -17,7 +17,7 @@
           "runToEntryPoint": "main",
           "svdFile": "./STM32F746.svd",
           "armToolchainPath": "C:/GNU_Arm/10-2020-q4-major/bin",
-          // "rtos": "C:/Program Files/SEGGER/JLink/GDBServer/RTOSPlugin_FreeRTOS.dll"
+        //   "rtos": "C:/Program Files/SEGGER/JLink/GDBServer/RTOSPlugin_FreeRTOS.dll"
         },
     ]
 }

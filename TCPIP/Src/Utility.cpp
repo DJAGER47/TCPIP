@@ -4,7 +4,7 @@ namespace TCPIP
 {
     namespace detail
     {
-        uint8_t Unpack8(const uint8_t *p, size_t offset, size_t size)
+        uint8_t Unpack8(const uint8_t *p, size_t offset)
         {
             return p[offset];
         }
@@ -12,7 +12,7 @@ namespace TCPIP
         uint16_t Unpack16(const uint8_t *p, size_t offset, size_t size)
         {
             uint16_t rc = 0;
-            for (int i = 0; i < size; i++)
+            for (size_t i = 0; i < size; i++)
             {
                 rc <<= 8;
                 rc |= p[offset++];
@@ -23,7 +23,7 @@ namespace TCPIP
         uint32_t Unpack32(const uint8_t *p, size_t offset, size_t size)
         {
             uint32_t rc = 0;
-            for (int i = 0; i < size; i++)
+            for (size_t i = 0; i < size; i++)
             {
                 rc <<= 8;
                 rc |= p[offset++];
@@ -46,7 +46,7 @@ namespace TCPIP
 
         size_t Pack32(uint8_t *p, size_t offset, uint32_t value)
         {
-            p[offset++] = (value >> 24) & 0xFF;
+            p[offset++] = (value >> 24) & 0xFFUL;
             p[offset++] = (value >> 16) & 0xFF;
             p[offset++] = (value >> 8) & 0xFF;
             p[offset++] = value & 0xFF;

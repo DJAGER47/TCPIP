@@ -9,7 +9,7 @@ namespace TCPIP
 {
     namespace detail
     {
-        uint8_t Unpack8(const uint8_t *p, size_t offset, size_t size = 1);
+        uint8_t Unpack8(const uint8_t *p, size_t offset);
         uint16_t Unpack16(const uint8_t *p, size_t offset, size_t size = 2);
         uint32_t Unpack32(const uint8_t *p, size_t offset, size_t size = 4);
 

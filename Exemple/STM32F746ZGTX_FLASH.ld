@@ -129,6 +129,14 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+
+  .rtt (ORIGIN(RAM)) : 
+  {
+    . = ALIGN(4);
+    KEEP(*(.rtt))
+    . = ALIGN(4);
+  } >RAM
+
   /* Used by the startup to initialize data */
   _sidata = LOADADDR(.data);
 

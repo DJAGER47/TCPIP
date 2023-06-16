@@ -5,11 +5,11 @@
 
 extern ETH_HandleTypeDef gEthHandle;
 
-int32_t ETH_PHY_IO_Init(void);
-int32_t ETH_PHY_IO_DeInit (void);
-int32_t ETH_PHY_IO_ReadReg(uint32_t DevAddr, uint32_t RegAddr, uint32_t *pRegVal);
-int32_t ETH_PHY_IO_WriteReg(uint32_t DevAddr, uint32_t RegAddr, uint32_t RegVal);
-int32_t ETH_PHY_IO_GetTick(void);
+int32_t  ETH_PHY_IO_Init(void);
+int32_t  ETH_PHY_IO_DeInit (void);
+int32_t  ETH_PHY_IO_ReadReg(uint32_t DevAddr, uint32_t RegAddr, uint32_t *pRegVal);
+int32_t  ETH_PHY_IO_WriteReg(uint32_t DevAddr, uint32_t RegAddr, uint32_t RegVal);
+uint32_t ETH_PHY_IO_GetTick(void);
 
 lan8742_IOCtx_t  LAN8742_IOCtx = {ETH_PHY_IO_Init,
                                ETH_PHY_IO_DeInit,
@@ -85,7 +85,7 @@ int32_t ETH_PHY_IO_WriteReg(uint32_t DevAddr, uint32_t RegAddr, uint32_t RegVal)
   * @brief  Get the time in millisecons used for internal PHY driver process.
   * @retval Time value
   */
-int32_t ETH_PHY_IO_GetTick(void)
+uint32_t ETH_PHY_IO_GetTick(void)
 {
   return HAL_GetTick();
 }
