@@ -10,165 +10,161 @@
 namespace TCPIP
 {
 
-// public:
+  // public:
 
-    // IPv4::IPv4(InterfaceMAC &mac, ARP &arp, ICMP &icmp)
-    //     : PacketID(0)
-    //       // , UnresolvedQueue("IP", 20, TxBuffer)
-    //       ,
-    //       address_(), mac_(mac), arp_(arp), icmp_(icmp)
+  // IPv4::IPv4(InterfaceMAC &mac, ARP &arp, ICMP &icmp)
+  //     : PacketID(0)
+  //       // , UnresolvedQueue("IP", 20, TxBuffer)
+  //       ,
+  //       address_(), mac_(mac), arp_(arp), icmp_(icmp)
+  // {
+  //     address_.DataValid = false;
+  // }
+
+  void IPv4::ProcessRx(EthBuff *buffer)
+  {
+    // uint8_t headerLength;
+    // uint8_t protocol;
+    // uint8_t* sourceIP;
+    // uint8_t* targetIP;
+    // uint8_t* packet = buffer->Packet;
+    // uint16_t length = buffer->Length;
+    // uint16_t dataLength;
+
+    // headerLength = (packet[0] & 0x0F) * 4;
+    // dataLength = Unpack16(packet, 2);
+    // protocol = packet[9];
+    // sourceIP = &packet[12];
+    // targetIP = &packet[16];
+
+    // if (IsLocal(targetIP))
     // {
-    //     address_.DataValid = false;
+    //     buffer->Packet += headerLength;
+    //     dataLength -= headerLength;
+    //     buffer->Length = dataLength;
+
+    //     switch (protocol)
+    //     {
+    //     case 0x01: // icmp_
+    //         icmp_.ProcessRx(buffer, sourceIP, targetIP);
+    //         break;
+    //     default: printf("Unsupported IP Protocol 0x%02X\n", protocol); break;
+    //     }
     // }
+  }
 
-    void IPv4::ProcessRx(EthBuff *buffer)
-    {
-        // uint8_t headerLength;
-        // uint8_t protocol;
-        // uint8_t* sourceIP;
-        // uint8_t* targetIP;
-        // uint8_t* packet = buffer->Packet;
-        // uint16_t length = buffer->Length;
-        // uint16_t dataLength;
+  // const EthBuff *IPv4::GetTxBuffer(InterfaceMAC *mac)
+  // {
+  //     const EthBuff *buffer;
 
-        // headerLength = (packet[0] & 0x0F) * 4;
-        // dataLength = Unpack16(packet, 2);
-        // protocol = packet[9];
-        // sourceIP = &packet[12];
-        // targetIP = &packet[16];
+  //     // buffer = mac->GetTxBuffer();
+  //     // if (buffer != nullptr)
+  //     // {
+  //     //     buffer->Packet += GetHeaderSize();
+  //     //     buffer->Remainder -= GetHeaderSize();
+  //     // }
 
-        // if (IsLocal(targetIP))
-        // {
-        //     buffer->Packet += headerLength;
-        //     dataLength -= headerLength;
-        //     buffer->Length = dataLength;
+  //     return buffer;
+  // }
 
-        //     switch (protocol)
-        //     {
-        //     case 0x01: // icmp_
-        //         icmp_.ProcessRx(buffer, sourceIP, targetIP);
-        //         break;
-        //     default: printf("Unsupported IP Protocol 0x%02X\n", protocol); break;
-        //     }
-        // }
-    }
+  // void IPv4::Transmit(const EthBuff *buffer,
+  //                     uint8_t protocol,
+  //                     const uint8_t *targetIP,
+  //                     const uint8_t *sourceIP)
+  // {
+  //     // uint16_t checksum;
+  //     // const uint8_t* targetMAC;
+  //     // uint8_t* packet;
 
-    // const EthBuff *IPv4::GetTxBuffer(InterfaceMAC *mac)
-    // {
-    //     const EthBuff *buffer;
+  //     // buffer->Packet -= GetHeaderSize();
+  //     // buffer->Length += GetHeaderSize();
+  //     // packet = buffer->Packet;
 
-    //     // buffer = mac->GetTxBuffer();
-    //     // if (buffer != nullptr)
-    //     // {
-    //     //     buffer->Packet += GetHeaderSize();
-    //     //     buffer->Remainder -= GetHeaderSize();
-    //     // }
+  //     // packet[0] = 0x45; // Version and HeaderSize
+  //     // packet[1] = 0;    // ToS
+  //     // Pack16(packet, 2, buffer->Length);
 
-    //     return buffer;
-    // }
+  //     // PacketID++;
+  //     // Pack16(packet, 4, PacketID);
+  //     // packet[6] = 0; // Flags & FragmentOffset
+  //     // packet[7] = 0; // rest of FragmentOffset
 
-    // void IPv4::Transmit(const EthBuff *buffer,
-    //                     uint8_t protocol,
-    //                     const uint8_t *targetIP,
-    //                     const uint8_t *sourceIP)
-    // {
-    //     // uint16_t checksum;
-    //     // const uint8_t* targetMAC;
-    //     // uint8_t* packet;
+  //     // packet[8] = 32; // TTL
+  //     // packet[9] = protocol;
+  //     // Pack16(packet, 10, 0); // checksum placeholder
+  //     // PackBytes(packet, 12, sourceIP, 4);
+  //     // PackBytes(packet, 16, targetIP, 4);
 
-    //     // buffer->Packet -= GetHeaderSize();
-    //     // buffer->Length += GetHeaderSize();
-    //     // packet = buffer->Packet;
+  //     // checksum = FCS::Checksum(packet, 20);
+  //     // Pack16(packet, 10, checksum);
 
-    //     // packet[0] = 0x45; // Version and HeaderSize
-    //     // packet[1] = 0;    // ToS
-    //     // Pack16(packet, 2, buffer->Length);
+  //     // targetMAC = arp_.Protocol2Hardware(targetIP);
+  //     // if (targetMAC != nullptr)
+  //     // {
+  //     //     mac_.Transmit(buffer, targetMAC, 0x0800);
+  //     // }
+  //     // else
+  //     // {
+  //     //     // Could not find mac_ address, arp_ for it
+  //     //     UnresolvedQueue.Put(buffer);
+  //     // }
+  // }
 
-    //     // PacketID++;
-    //     // Pack16(packet, 4, PacketID);
-    //     // packet[6] = 0; // Flags & FragmentOffset
-    //     // packet[7] = 0; // rest of FragmentOffset
+  // void IPv4::Retransmit(const EthBuff *buffer)
+  // {
+  //     // mac_.Retransmit(buffer);
+  // }
 
-    //     // packet[8] = 32; // TTL
-    //     // packet[9] = protocol;
-    //     // Pack16(packet, 10, 0); // checksum placeholder
-    //     // PackBytes(packet, 12, sourceIP, 4);
-    //     // PackBytes(packet, 16, targetIP, 4);
+  // void IPv4::Retry()
+  //{
+  // int count;
+  // const EthBuff* buffer;
+  // const uint8_t* targetMAC;
 
-    //     // checksum = FCS::Checksum(packet, 20);
-    //     // Pack16(packet, 10, checksum);
+  // count = UnresolvedQueue.GetCount();
+  // for (int i = 0; i < count; i++)
+  // {
+  //     buffer = (const EthBuff*)UnresolvedQueue.Get();
 
-    //     // targetMAC = arp_.Protocol2Hardware(targetIP);
-    //     // if (targetMAC != nullptr)
-    //     // {
-    //     //     mac_.Transmit(buffer, targetMAC, 0x0800);
-    //     // }
-    //     // else
-    //     // {
-    //     //     // Could not find mac_ address, arp_ for it
-    //     //     UnresolvedQueue.Put(buffer);
-    //     // }
-    // }
+  //     targetMAC = arp_.Protocol2Hardware(&buffer->Packet[16]);
+  //     if (targetMAC != nullptr)
+  //     {
+  //         mac_.Transmit(buffer, targetMAC, 0x0800);
+  //     }
+  //     else
+  //     {
+  //         log_.print_log("Still could not find mac_ for IP\n");
+  //         UnresolvedQueue.Put(buffer);
+  //     }
+  // }
+  //}
 
-    // void IPv4::Retransmit(const EthBuff *buffer)
-    // {
-    //     // mac_.Retransmit(buffer);
-    // }
+  // void IPv4::FreeTxBuffer(const EthBuff *buffer)
+  // {
+  //     // mac_.FreeTxBuffer(buffer);
+  // }
 
-    // void IPv4::Retry()
-    //{
-        // int count;
-        // const EthBuff* buffer;
-        // const uint8_t* targetMAC;
+  // void IPv4::FreeRxBuffer(const EthBuff *buffer)
+  // {
+  //     // mac_.FreeRxBuffer(buffer);
+  // }
 
-        // count = UnresolvedQueue.GetCount();
-        // for (int i = 0; i < count; i++)
-        // {
-        //     buffer = (const EthBuff*)UnresolvedQueue.Get();
+  // private:
 
-        //     targetMAC = arp_.Protocol2Hardware(&buffer->Packet[16]);
-        //     if (targetMAC != nullptr)
-        //     {
-        //         mac_.Transmit(buffer, targetMAC, 0x0800);
-        //     }
-        //     else
-        //     {
-        //         log_.print_log("Still could not find mac_ for IP\n");
-        //         UnresolvedQueue.Put(buffer);
-        //     }
-        // }
-    //}
-
-    // void IPv4::FreeTxBuffer(const EthBuff *buffer)
-    // {
-    //     // mac_.FreeTxBuffer(buffer);
-    // }
-
-    // void IPv4::FreeRxBuffer(const EthBuff *buffer)
-    // {
-    //     // mac_.FreeRxBuffer(buffer);
-    // }
-
-
-    
-
-
-// private:
-
-    // bool IPv4::IsLocal(const uint8_t *addr)
-    // {
-    //     bool rc;
-    //     // uint8_t broadcast[] = {0xFF, 0xFF, 0xFF, 0xFF};
-    //     // if (address_.DataValid)
-    //     // {
-    //     //     rc = AddressCompare(addr, broadcast, GetAddressSize()) ||
-    //     //          AddressCompare(addr, GetUnicastAddress(), GetAddressSize()) ||
-    //     //          AddressCompare(addr, GetBroadcastAddress(), GetAddressSize());
-    //     // }
-    //     // else
-    //     // {
-    //     //     rc = AddressCompare(addr, broadcast, GetAddressSize());
-    //     // }
-    //     return rc;
-    // }
+  // bool IPv4::IsLocal(const uint8_t *addr)
+  // {
+  //     bool rc;
+  //     // uint8_t broadcast[] = {0xFF, 0xFF, 0xFF, 0xFF};
+  //     // if (address_.DataValid)
+  //     // {
+  //     //     rc = AddressCompare(addr, broadcast, GetAddressSize()) ||
+  //     //          AddressCompare(addr, GetUnicastAddress(), GetAddressSize()) ||
+  //     //          AddressCompare(addr, GetBroadcastAddress(), GetAddressSize());
+  //     // }
+  //     // else
+  //     // {
+  //     //     rc = AddressCompare(addr, broadcast, GetAddressSize());
+  //     // }
+  //     return rc;
+  // }
 }

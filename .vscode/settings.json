@@ -12,6 +12,7 @@
     "cstdlib": "cpp",
     "cstdint": "cpp"
   },
+  "editor.tabSize": 2,
   // "cmake.sourceDirectory": "/media/sf_C_DRIVE/Users/p.lavrovskiy/YandexDisk/Praktikum/yandex_tests/Task/Tests",
   // "cmake.sourceDirectory": "/media/sf_C_DRIVE/Users/p.lavrovskiy/YandexDisk/Praktikum/yandex_tests/Task/Exemple",
 

@@ -4,6 +4,7 @@
       // "-v",
     ]
   },
+  "editor.tabSize": 2,
   "files.associations": {
     "array": "cpp",
     "string_view": "cpp",

@@ -18,41 +18,40 @@ void TestBase()
   memcpy(mac.macUnicastAddress, mac_data, sizeof mac_data);
 
   TCPIP::IPv4::AddressIP4Settings infoIp = {
-    .Address = {IP_UnicastAddress},
-    .SubnetMask = {255, 255, 255, 0},
-    .Gateway = {192, 168, 1, 1}
-  };
+      .Address = {IP_UnicastAddress},
+      .SubnetMask = {255, 255, 255, 0},
+      .Gateway = {192, 168, 1, 1}};
   ip.SetAddressInfo(infoIp);
 
-//   uint8_t arp_pkg[] = {
-//   0x00, 0x01,
-//   0x08, 0x00,
-//   0x06,
-//   0x04,
-//   0x00, 0x01,
-//   0x34, 0xce, 0x00, 0x64, 0x8a, 0x0b,
-//   0xc0, 0xa8, 0x01, 0x01,
-//   0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-//   IP_UnicastAddress};
+  //   uint8_t arp_pkg[] = {
+  //   0x00, 0x01,
+  //   0x08, 0x00,
+  //   0x06,
+  //   0x04,
+  //   0x00, 0x01,
+  //   0x34, 0xce, 0x00, 0x64, 0x8a, 0x0b,
+  //   0xc0, 0xa8, 0x01, 0x01,
+  //   0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  //   IP_UnicastAddress};
 
-//   TCPIP::ARP arp(mac, ip, log);
+  //   TCPIP::ARP arp(mac, ip, log);
 
-//   mockDataBuf buf(arp_pkg);
-//   arp.ProcessRx(&buf);
+  //   mockDataBuf buf(arp_pkg);
+  //   arp.ProcessRx(&buf);
 
-//   uint8_t arp_pkg_replay[] = {
-//     0x00, 0x01,
-//     0x08, 0x00,
-//     0x06,
-//     0x04,
-//     0x00, 0x02,
-//     MAC_UnicastAddress,
-//     IP_UnicastAddress,
-//     0x34, 0xce, 0x00, 0x64, 0x8a, 0x0b,
-//     0xc0, 0xa8, 0x01, 0x01
-//   };
+  //   uint8_t arp_pkg_replay[] = {
+  //     0x00, 0x01,
+  //     0x08, 0x00,
+  //     0x06,
+  //     0x04,
+  //     0x00, 0x02,
+  //     MAC_UnicastAddress,
+  //     IP_UnicastAddress,
+  //     0x34, 0xce, 0x00, 0x64, 0x8a, 0x0b,
+  //     0xc0, 0xa8, 0x01, 0x01
+  //   };
 
-//   ASSERT(!memcmp(mac.data_, arp_pkg_replay, sizeof arp_pkg_replay));
+  //   ASSERT(!memcmp(mac.data_, arp_pkg_replay, sizeof arp_pkg_replay));
 }
 
 void TestAll1()

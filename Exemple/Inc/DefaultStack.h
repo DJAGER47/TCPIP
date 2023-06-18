@@ -9,15 +9,15 @@
 
 namespace TCPIP
 {
-    class DefaultStack
-    {
-    public:
-        DefaultStack();
+  class DefaultStack
+  {
+  public:
+    DefaultStack();
 
-        Logger log_;
-        MACEthernet mac_;
-        IPv4 ip_;
-        ARP arp_;
-        // ICMP ICMP;
-    };
+    Logger log_;
+    MACEthernet mac_;
+    IPv4 ip_;
+    ARP arp_;
+    // ICMP ICMP;
+  };
 }

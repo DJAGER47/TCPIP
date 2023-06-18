@@ -1,15 +1,13 @@
 #pragma once
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-
 
 #include "stm32f7xx_hal.h"
 
-
-void Error_Handler(void);
-
+  void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define RMII_TXD0_Pin GPIO_PIN_13
@@ -33,7 +31,6 @@ void Error_Handler(void);
 
 #define RMII_REF_CLK_Pin GPIO_PIN_1
 #define RMII_REF_CLK_GPIO_Port GPIOA
-
 
 #ifdef __cplusplus
 }

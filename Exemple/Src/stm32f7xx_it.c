@@ -42,35 +42,35 @@ extern ETH_HandleTypeDef gEthHandle;
  */
 void HardFault_Handler(void)
 {
-    volatile struct
-    {
-        uint32_t r0;
-        uint32_t r1;
-        uint32_t r2;
-        uint32_t r3;
-        uint32_t r12;
-        uint32_t lr;
-        uint32_t pc;
-        uint32_t psr;
-    } *stack_ptr; // Указатель на текущее значение стека(SP)
+  volatile struct
+  {
+    uint32_t r0;
+    uint32_t r1;
+    uint32_t r2;
+    uint32_t r3;
+    uint32_t r12;
+    uint32_t lr;
+    uint32_t pc;
+    uint32_t psr;
+  } *stack_ptr; // Указатель на текущее значение стека(SP)
 
-    asm(
-        "TST lr, #4 \n"         // Тестируем 3ий бит указателя стека(побитовое И)
-        "ITE EQ \n"             // Значение указателя стека имеет бит 3?
-        "MRSEQ %[ptr], MSP  \n" // Да, сохраняем основной указатель стека
-        "MRSNE %[ptr], PSP  \n" // Нет, сохраняем указатель стека процесса
-        : [ptr] "=r"(stack_ptr));
+  asm(
+      "TST lr, #4 \n"         // Тестируем 3ий бит указателя стека(побитовое И)
+      "ITE EQ \n"             // Значение указателя стека имеет бит 3?
+      "MRSEQ %[ptr], MSP  \n" // Да, сохраняем основной указатель стека
+      "MRSNE %[ptr], PSP  \n" // Нет, сохраняем указатель стека процесса
+      : [ptr] "=r"(stack_ptr));
 
-    _printf("HardFault_Handler!!!!!!!!!!!!!!\n");
+  _printf("HardFault_Handler!!!!!!!!!!!!!!\n");
 
-    _printf("lr  0x%x\n", stack_ptr->lr);
-    _printf("pc  0x%x\n", stack_ptr->pc);
-    _printf("psr 0x%x\n", stack_ptr->psr);
-    // _printf("lr 0x%x", stack_ptr->lr);
-    /* Go to infinite loop when Hard Fault exception occurs */
-    while (1)
-    {
-    }
+  _printf("lr  0x%x\n", stack_ptr->lr);
+  _printf("pc  0x%x\n", stack_ptr->pc);
+  _printf("psr 0x%x\n", stack_ptr->psr);
+  // _printf("lr 0x%x", stack_ptr->lr);
+  /* Go to infinite loop when Hard Fault exception occurs */
+  while (1)
+  {
+  }
 }
 
 /**
@@ -80,10 +80,10 @@ void HardFault_Handler(void)
  */
 void MemManage_Handler(void)
 {
-    /* Go to infinite loop when Memory Manage exception occurs */
-    while (1)
-    {
-    }
+  /* Go to infinite loop when Memory Manage exception occurs */
+  while (1)
+  {
+  }
 }
 
 /**
@@ -93,10 +93,10 @@ void MemManage_Handler(void)
  */
 void BusFault_Handler(void)
 {
-    /* Go to infinite loop when Bus Fault exception occurs */
-    while (1)
-    {
-    }
+  /* Go to infinite loop when Bus Fault exception occurs */
+  while (1)
+  {
+  }
 }
 
 /**
@@ -106,10 +106,10 @@ void BusFault_Handler(void)
  */
 void UsageFault_Handler(void)
 {
-    /* Go to infinite loop when Usage Fault exception occurs */
-    while (1)
-    {
-    }
+  /* Go to infinite loop when Usage Fault exception occurs */
+  while (1)
+  {
+  }
 }
 
 /**
@@ -119,7 +119,7 @@ void UsageFault_Handler(void)
  */
 void SysTick_Handler(void)
 {
-    osSystickHandler();
+  osSystickHandler();
 }
 
 /******************************************************************************/
@@ -136,5 +136,5 @@ void SysTick_Handler(void)
  */
 void ETH_IRQHandler(void)
 {
-    HAL_ETH_IRQHandler(&gEthHandle);
+  HAL_ETH_IRQHandler(&gEthHandle);
 }
