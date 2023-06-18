@@ -4,31 +4,31 @@ namespace TCPIP
 {
     namespace detail
     {
-        uint8_t Unpack8(const uint8_t *p, size_t offset)
-        {
-            return p[offset];
-        }
-
-        uint16_t Unpack16(const uint8_t *p, size_t offset, size_t size)
-        {
-            uint16_t rc = 0;
-            for (size_t i = 0; i < size; i++)
-            {
-                rc <<= 8;
-                rc |= p[offset++];
-            }
-            return rc;
-        }
-
-        uint32_t Unpack32(const uint8_t *p, size_t offset, size_t size)
+        static uint32_t Unpack(const uint8_t *p, size_t offset, size_t size)
         {
             uint32_t rc = 0;
-            for (size_t i = 0; i < size; i++)
+            for (size_t i = 0; i < size; ++i)
             {
                 rc <<= 8;
                 rc |= p[offset++];
             }
             return rc;
+        }
+
+
+        uint8_t Unpack8(const uint8_t *p, size_t offset)
+        {
+            return static_cast<uint8_t>(Unpack(p, offset, 1));
+        }
+
+        uint16_t Unpack16(const uint8_t *p, size_t offset)
+        {
+            return static_cast<uint16_t>(Unpack(p, offset, 2));
+        }
+
+        uint32_t Unpack32(const uint8_t *p, size_t offset)
+        {
+            return Unpack(p, offset, 4);
         }
 
         size_t Pack8(uint8_t *p, size_t offset, uint8_t value)
@@ -39,17 +39,17 @@ namespace TCPIP
 
         size_t Pack16(uint8_t *p, size_t offset, uint16_t value)
         {
-            p[offset++] = (value >> 8) & 0xFF;
-            p[offset++] = value & 0xFF;
+            p[offset++] = static_cast<uint8_t>((value >> 8) & 0xFF);
+            p[offset++] = static_cast<uint8_t>(value & 0xFF);
             return offset;
         }
 
         size_t Pack32(uint8_t *p, size_t offset, uint32_t value)
         {
-            p[offset++] = (value >> 24) & 0xFFUL;
-            p[offset++] = (value >> 16) & 0xFF;
-            p[offset++] = (value >> 8) & 0xFF;
-            p[offset++] = value & 0xFF;
+            p[offset++] = static_cast<uint8_t>((value >> 24) & 0xFF);
+            p[offset++] = static_cast<uint8_t>((value >> 16) & 0xFF);
+            p[offset++] = static_cast<uint8_t>((value >> 8) & 0xFF);
+            p[offset++] = static_cast<uint8_t>(value & 0xFF);
             return offset;
         }
 

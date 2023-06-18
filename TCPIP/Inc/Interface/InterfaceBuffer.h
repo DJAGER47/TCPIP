@@ -6,22 +6,15 @@
 
 namespace TCPIP
 {
-    struct pbuf
-    {
-        // next pbuf in the chain
-        struct pbuf *next;
-        // pointer to the actual data in the buffer
-        uint8_t *payload;
-        // the full data length of the entire chain
-        uint16_t tot_len;
-        // length of this buffer
-        uint16_t len;
-    };
-
     class EthBuff
     {
     public:
-        struct pbuf pbuf;
+        // next pbuf in the chain
+        EthBuff *next;
+        // the full data length of the entire chain
+        size_t tot_len;
+        // length of this buffer
+        size_t len;
         uint8_t buff[ETH_MAX_PACKET_SIZE];
     };
 

@@ -17,8 +17,8 @@ namespace TCPIP
 
         // void FreeTxBuffer(const EthBuff *);
         // void FreeRxBuffer(const EthBuff *);
-        virtual size_t GetHeaderSize() const = 0;
-        virtual size_t GetAddressSize() const = 0;
+        virtual uint8_t GetHeaderSize() const = 0;
+        virtual uint8_t GetAddressSize() const = 0;
         virtual const uint8_t *GetUnicastAddress() const = 0;
         virtual const uint8_t *GetGatewayAddress() const  = 0;
         virtual const uint8_t *GetSubnetMask() const = 0;

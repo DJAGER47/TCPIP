@@ -1,7 +1,6 @@
 #include "ethernetif.h"
 #include <string.h>
 
-#include "stupidAllocator.h"
 #include "DefaultStack.h"
 
 #include "cmsis_os.h"
@@ -20,7 +19,6 @@ static const TCPIP::IPv4::AddressIP4Settings ADDR_IP = {{192, 168, 0, 20}, {255,
 
 static ETH_DMADescTypeDef gDMARxDscrTab[ETH_RX_DESC_CNT] __attribute__((used)); // Ethernet Rx DMA Descriptors
 static ETH_DMADescTypeDef gDMATxDscrTab[ETH_TX_DESC_CNT] __attribute__((used)); // Ethernet Tx DMA Descriptors
-static TCPIP::stupidAllocator<ETH_RX_DESC_CNT> sA_Rx; // Memory allocator for reception
 static osSemaphoreId gRxSemaphore = NULL; // Semaphore to signal incoming packets
 static osSemaphoreId gTxSemaphore = NULL; // Semaphore to signal transmit packet complete
 
@@ -119,62 +117,36 @@ void low_level_init()
 void writeEth(void const *argument)
 {
     UNUSED(argument);
-    ETH_BufferTypeDef Txbuffer[ETH_TX_DESC_CNT];
-    //  uint8_t data[] = {
-    //    0xff,0xff,0xff,0xff,0xff,0xff,0x30,0x24,0xa9,0x87,0x3e,0x01,0x08,0x06,0x00,0x01,0x08,0x00,0x06,0x04,0x00,0x01,0x30,
-    //    0x24,0xa9,0x87,0x3e,0x01,0xc0,0xa8,0x00,0x28,0x00,0x00,0x00,0x00,0x00,0x00,0xc0,0xa8,0x00,0x14
-    //  };
+    // ETH_BufferTypeDef Txbuffer[ETH_TX_DESC_CNT];
 
-#define IP_UnicastAddress 192, 168, 0, 20
-#define MAC_UnicastAddress 0x00, 0x80, 0xE1, 0x00, 0x00, 0x00
+    // memset(Txbuffer, 0, ETH_TX_DESC_CNT * sizeof(ETH_BufferTypeDef));
 
-#define IP_PC_UnicastAddress 192, 168, 0, 40
-#define MAC_PC_UnicastAddress 0x30, 0x24, 0xA9, 0x87, 0x3E, 0x01
+    // Txbuffer[0].buffer = arp_pkg_replay;
+    // Txbuffer[0].len = sizeof arp_pkg_replay;
+    // Txbuffer[0].next = NULL;
 
-    uint8_t arp_pkg_replay[] = {
-        MAC_UnicastAddress,
-        MAC_PC_UnicastAddress,
-        0x08, 0x06,
-
-        0x00, 0x01,
-        0x08, 0x00,
-        0x06,
-        0x04,
-        0x00, 0x02,
-        MAC_UnicastAddress,
-        IP_UnicastAddress,
-        MAC_PC_UnicastAddress,
-        IP_PC_UnicastAddress,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
-    memset(Txbuffer, 0, ETH_TX_DESC_CNT * sizeof(ETH_BufferTypeDef));
-
-    Txbuffer[0].buffer = arp_pkg_replay;
-    Txbuffer[0].len = sizeof arp_pkg_replay;
-    Txbuffer[0].next = NULL;
-
-    gTxConfig.Length = sizeof arp_pkg_replay;
-    gTxConfig.TxBuffer = Txbuffer;
-    gTxConfig.pData = arp_pkg_replay;
+    // gTxConfig.Length = sizeof arp_pkg_replay;
+    // gTxConfig.TxBuffer = Txbuffer;
+    // gTxConfig.pData = arp_pkg_replay;
 
     while (1)
     {
-        osDelay(5000);
+        // osDelay(5000);
 
-        HAL_ETH_Transmit_IT(&gEthHandle, &gTxConfig);
-        _printf_mac("Transmit_IT\n");
-        while (osSemaphoreWait(gTxSemaphore, osWaitForever) != osOK)
-        {
-        }
-        _printf_mac("ReleaseTxPacket\n");
-        HAL_ETH_ReleaseTxPacket(&gEthHandle);
+        // HAL_ETH_Transmit_IT(&gEthHandle, &gTxConfig);
+        // _printf_mac("Transmit_IT\n");
+        // while (osSemaphoreWait(gTxSemaphore, osWaitForever) != osOK)
+        // {
+        // }
+        // _printf_mac("ReleaseTxPacket\n");
+        
     }
 }
 
 void readEth(void const *argument)
 {
     UNUSED(argument);
-    TCPIP::EthBuff *p = NULL;
+    TCPIP::EthBuff *p = nullptr;
 
     while (1)
     {
@@ -183,16 +155,16 @@ void readEth(void const *argument)
             _printf_mac("ReadData\n");
             while (1)
             {
-                if ((HAL_ETH_ReadData(&gEthHandle, (void **)&p) == HAL_OK) && (p != NULL))
+                if ((HAL_ETH_ReadData(&gEthHandle, (void **)&p) == HAL_OK) && (p != nullptr))
                 {
                     gDStack.mac_.ProcessRx(p);
                     _printf_mac("Input len %d\n", p->pbuf.len);
-                    for (uint32_t i = 0; i < p->pbuf.len; ++i)
+                    for (uint32_t i = 0; i < p->len; ++i)
                     {
-                        _printf_mac("%02x ", ((uint8_t *)p->pbuf.payload)[i]);
+                        _printf_mac("%02x ", p->buff[i]);
                     }
                     _printf_mac("\n");
-                    sA_Rx.release(p);
+                    gDStack.mac_.FreeRxBuffer(p);
                 }
                 else
                 {
@@ -216,6 +188,7 @@ void HAL_ETH_TxCpltCallback(ETH_HandleTypeDef *heth)
 {
     UNUSED(heth);
     _printf_mac("IRQ Tx completed\n");
+    HAL_ETH_ReleaseTxPacket(&gEthHandle);
     osSemaphoreRelease(gTxSemaphore);
 }
 
@@ -233,8 +206,7 @@ void HAL_ETH_ErrorCallback(ETH_HandleTypeDef *heth)
 void HAL_ETH_RxAllocateCallback(uint8_t **buff)
 {
     _printf_mac("IRQ RxAllocateCallback\n");
-    auto p = sA_Rx.allocate();
-    p->pbuf.payload = p->buff;
+    auto p = gDStack.mac_.GetRXBuffer();
     *buff = (uint8_t *)p + offsetof(TCPIP::EthBuff, buff);
 }
 
@@ -242,13 +214,13 @@ void HAL_ETH_RxLinkCallback(void **pStart, void **pEnd, uint8_t *buff, uint16_t 
 {
     _printf_mac("IRQ RxLinkCallback %d\n", Length);
 
-    struct TCPIP::pbuf **ppStart = (struct TCPIP::pbuf **)pStart;
-    struct TCPIP::pbuf **ppEnd = (struct TCPIP::pbuf **)pEnd;
-    struct TCPIP::pbuf *p = NULL;
+    struct TCPIP::EthBuff **ppStart = (struct TCPIP::EthBuff **)pStart;
+    struct TCPIP::EthBuff **ppEnd = (struct TCPIP::EthBuff **)pEnd;
+    struct TCPIP::EthBuff *p = nullptr;
 
     /* Get the struct pbuf from the buff address. */
-    p = (struct TCPIP::pbuf *)(buff - offsetof(TCPIP::EthBuff, buff));
-    p->next = NULL;
+    p = (struct TCPIP::EthBuff *)(buff - offsetof(TCPIP::EthBuff, buff));
+    p->next = nullptr;
     p->tot_len = 0;
     p->len = Length;
 
@@ -267,7 +239,7 @@ void HAL_ETH_RxLinkCallback(void **pStart, void **pEnd, uint8_t *buff, uint16_t 
 
     /* Update the total length of all the buffers of the chain. Each pbuf in the chain should have its tot_len
      * set to its own length, plus the length of all the following pbufs in the chain. */
-    for (p = *ppStart; p != NULL; p = p->next)
+    for (p = *ppStart; p != nullptr; p = p->next)
     {
         p->tot_len += Length;
     }
@@ -277,7 +249,6 @@ void HAL_ETH_TxFreeCallback(uint32_t *buff)
 {
     UNUSED(buff);
     _printf_mac("!!!!!!!!!!!!!!! IRQ TxFreeCallback\n");
-    // pbuf_free((struct pbuf *)buff);
 }
 
 /// @brief  Check the ETH link state and update netif accordingly.

@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include <cstdint>
@@ -10,8 +8,8 @@ namespace TCPIP
     namespace detail
     {
         uint8_t Unpack8(const uint8_t *p, size_t offset);
-        uint16_t Unpack16(const uint8_t *p, size_t offset, size_t size = 2);
-        uint32_t Unpack32(const uint8_t *p, size_t offset, size_t size = 4);
+        uint16_t Unpack16(const uint8_t *p, size_t offset);
+        uint32_t Unpack32(const uint8_t *p, size_t offset);
 
         size_t Pack8(uint8_t *p, size_t offset, uint8_t value);
         size_t Pack16(uint8_t *p, size_t offset, uint16_t value);
@@ -25,4 +23,4 @@ namespace TCPIP
         uint16_t CalculateIcmpChecksum(const uint8_t *buffer, int size);
 
     } // namespace detail
-}
+} // namespace TCPIP

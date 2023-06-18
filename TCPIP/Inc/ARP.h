@@ -8,21 +8,13 @@
 
 namespace TCPIP
 {
+    /// @brief Address Resolution Protocol
     class ARP
     {
-    public:
-        ARP() = delete;
-        ARP(ARP &) = delete;
-        ARP(InterfaceMAC &mac, IPv4 &ip, InterfaceLogger &log) : mac_(mac), ip_(ip), log_(log){};
-
-        /// @brief Parsing the package
-        /// @param buffer 
-        void ProcessRx(const EthBuff *buffer, size_t offset);
-
-        /// @brief Add to cache table
-        void Add(const uint8_t *protocolAddress, const uint8_t *hardwareAddress);
-
     private:
+        // https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml
+        static const uint8_t hardwareType = 1;
+
         enum
         {
             request = 0x0001,
@@ -42,19 +34,20 @@ namespace TCPIP
             uint8_t TPA[4]; // Target protocol address
         };
 
-        /// @brief Reply to Mac Address Request
-        /// @param info 
-        void SendReply(const ARPInfo &info);
+    public:
+        ARP() = delete;
+        ARP(ARP &) = delete;
+        ARP(InterfaceMAC &mac, IPv4 &ip, InterfaceLogger &log) : mac_(mac), ip_(ip), log_(log){};
 
+        void ProcessRx(const EthBuff *buffer, size_t offset);
+        void Add(const uint8_t *protocolAddress, const uint8_t *hardwareAddress);
+        void SendRequest(const uint8_t *targetIP);
+
+    private:
         InterfaceMAC &mac_;
         IPv4 &ip_;
         InterfaceLogger &log_;
+
+        void SendReply(const ARPInfo &info);
     };
-
-        // const uint8_t *Protocol2Hardware(const uint8_t *address);
-        // bool IsLocal(const uint8_t *address);
-        // bool IsBroadcast(const uint8_t *address);
-
-        // void SendRequest(const uint8_t *targetIP);
-        // int LocateProtocolAddress(const uint8_t *address);
 }

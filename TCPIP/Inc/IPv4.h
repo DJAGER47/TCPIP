@@ -39,8 +39,8 @@ namespace TCPIP
 
         // void FreeTxBuffer(const EthBuff *);
         // void FreeRxBuffer(const EthBuff *);
-        size_t GetHeaderSize() const { return HEADER_SIZE; }
-        size_t GetAddressSize() const { return ADDRESS_SIZE; }
+        uint8_t GetHeaderSize() const { return HEADER_SIZE; }
+        uint8_t GetAddressSize() const { return ADDRESS_SIZE; }
         const uint8_t *GetUnicastAddress() const { return address_.Address; }
         const uint8_t *GetGatewayAddress() const { return address_.Gateway; }
         const uint8_t *GetSubnetMask() const { return address_.SubnetMask; }

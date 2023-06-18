@@ -15,18 +15,35 @@ namespace TCPIP
 
         void release(EthBuff *ptr)
         {
-            memset(ptr, 0, sizeof(EthBuff));
+            if (ptr->next != nullptr)
+                release(ptr->next);
+
+            for (size_t i = 0; i < length; ++i)
+            {
+                if (ptr == &cache[i])
+                {
+                    isFree[i] = true;
+                    return;
+                }
+            }
         }
 
         EthBuff *allocate()
         {
-            auto ret = &cache[index++];
-            index = index >= length * 2 ? 0 : index;
-            return ret;
+            for (size_t i = 0; i < length; ++i)
+            {
+                if (isFree[i])
+                {
+                    isFree[i] = false;
+                    return &cache[i];
+                }
+            }
+            return nullptr;
         }
 
     private:
-        EthBuff cache[length * 2];
+        EthBuff cache[length];
+        bool isFree[length] = {true};
         size_t index = 0;
     };
 }
