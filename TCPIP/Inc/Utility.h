@@ -20,7 +20,7 @@ namespace TCPIP
 
     bool AddressCompare(const uint8_t *a1, const uint8_t *a2, int length);
 
-    uint16_t CalculateIcmpChecksum(const uint8_t *buffer, int size);
+    uint16_t CalculateChecksum(const uint8_t *buffer, int size);
 
   } // namespace detail
 } // namespace TCPIP

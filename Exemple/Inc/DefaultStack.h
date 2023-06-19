@@ -18,6 +18,6 @@ namespace TCPIP
     MACEthernet mac_;
     IPv4 ip_;
     ARP arp_;
-    // ICMP ICMP;
+    ICMP icmp_;
   };
 }

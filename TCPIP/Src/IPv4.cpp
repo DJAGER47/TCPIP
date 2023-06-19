@@ -1,170 +1,98 @@
-
-// #include <stdio.h>
 #include "IPv4.h"
-
-// #include "InterfaceMAC.h"
-// #include "ARP.h"
-// #include "ICMP.h"
-// #include "Utility.h"
+#include "Utility.h"
 
 namespace TCPIP
 {
 
   // public:
-
-  // IPv4::IPv4(InterfaceMAC &mac, ARP &arp, ICMP &icmp)
-  //     : PacketID(0)
-  //       // , UnresolvedQueue("IP", 20, TxBuffer)
-  //       ,
-  //       address_(), mac_(mac), arp_(arp), icmp_(icmp)
-  // {
-  //     address_.DataValid = false;
-  // }
-
-  void IPv4::ProcessRx(EthBuff *buffer)
+  void IPv4::ProcessRx(const EthBuff *buffer, size_t offset)
   {
-    // uint8_t headerLength;
-    // uint8_t protocol;
-    // uint8_t* sourceIP;
-    // uint8_t* targetIP;
-    // uint8_t* packet = buffer->Packet;
-    // uint16_t length = buffer->Length;
-    // uint16_t dataLength;
+    const uint8_t *packet = buffer->buff + offset;
+    HeaderIPv4 head;
+    head.Version = detail::Unpack8(packet, 0) & 0xF0 >> 4;
+    head.IHL = detail::Unpack8(packet, 0) & 0x0F;
+    head.TypeOfService = detail::Unpack8(packet, 1);
+    head.TotalLength = detail::Unpack16(packet, 2);
+    head.Identification = detail::Unpack16(packet, 4);
+    head.Flags = detail::Unpack8(packet, 6) & 0xE0 >> 5;
+    head.FragmentOffset = detail::Unpack16(packet, 6) & 0x1FFFU;
+    head.TTL = detail::Unpack8(packet, 7);
+    head.Protocol = detail::Unpack8(packet, 9);
+    head.Crc = detail::Unpack16(packet, 10);
+    head.sourceIP = &packet[12];
+    head.targetIP = &packet[16];
 
-    // headerLength = (packet[0] & 0x0F) * 4;
-    // dataLength = Unpack16(packet, 2);
-    // protocol = packet[9];
-    // sourceIP = &packet[12];
-    // targetIP = &packet[16];
+    if (detail::CalculateChecksum(packet, HEADER_SIZE))
+    {
+      log_.print_log(InterfaceLogger::ERROR, "IPv4: CRC is not correct\n");
+      return;
+    }
 
-    // if (IsLocal(targetIP))
-    // {
-    //     buffer->Packet += headerLength;
-    //     dataLength -= headerLength;
-    //     buffer->Length = dataLength;
+    if (IsThisMyAddress(head.targetIP))
+    {
+      switch (head.Protocol)
+      {
+      case InterfaceIP::Protocol::pICMP:
+        icmp_.ProcessRx(buffer, offset + HEADER_SIZE, head.sourceIP);
+        break;
 
-    //     switch (protocol)
-    //     {
-    //     case 0x01: // icmp_
-    //         icmp_.ProcessRx(buffer, sourceIP, targetIP);
-    //         break;
-    //     default: printf("Unsupported IP Protocol 0x%02X\n", protocol); break;
-    //     }
-    // }
+      default:
+        log_.print_log(InterfaceLogger::WARNING, "IPv4: Unsupported IP Protocol 0x%02X\n", head.Protocol);
+        break;
+      }
+    }
   }
 
-  // const EthBuff *IPv4::GetTxBuffer(InterfaceMAC *mac)
-  // {
-  //     const EthBuff *buffer;
+  void IPv4::Transmit(EthBuff *buffer, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP)
+  {
+    size_t offset = mac_.GetTxOffset();
+    uint8_t *packet = buffer->buff + offset;
 
-  //     // buffer = mac->GetTxBuffer();
-  //     // if (buffer != nullptr)
-  //     // {
-  //     //     buffer->Packet += GetHeaderSize();
-  //     //     buffer->Remainder -= GetHeaderSize();
-  //     // }
+    packet[0] = (IpVersion << 4) | (IpDefHeaderLength);                // Version and HeaderSize
+    packet[1] = 0;                                                     // Type of Service
+    detail::Pack16(packet, 2, static_cast<uint16_t>(buffer->tot_len)); // TotalLength
+    detail::Pack16(packet, 4, ++PacketID);                             // Identification
+    packet[6] = 0;                                                     // Flags & FragmentOffset
+    packet[7] = 0;                                                     // FragmentOffset
+    packet[8] = 32;                                                    // TTL
+    packet[9] = protocol;                                              // Protocol
+    detail::Pack16(packet, 10, 0);                                     // checksum
+    detail::PackBytes(packet, 12, sourceIP, ADDRESS_SIZE);
+    detail::PackBytes(packet, 16, targetIP, ADDRESS_SIZE);
 
-  //     return buffer;
-  // }
+    uint16_t checksum = detail::CalculateChecksum(packet, HEADER_SIZE);
+    detail::Pack16(packet, 10, checksum);
 
-  // void IPv4::Transmit(const EthBuff *buffer,
-  //                     uint8_t protocol,
-  //                     const uint8_t *targetIP,
-  //                     const uint8_t *sourceIP)
-  // {
-  //     // uint16_t checksum;
-  //     // const uint8_t* targetMAC;
-  //     // uint8_t* packet;
+    const uint8_t *targetMAC = arp_.Ip2Mac(targetIP);
+    if (targetMAC != nullptr)
+    {
+      mac_.Transmit(buffer, targetMAC, InterfaceMAC::EtherType::etIPv4);
+    }
+    else
+    {
+      log_.print_log(InterfaceLogger::WARNING, "IPv4: Can't send it, don't know MAC\n");
+    }
+  }
 
-  //     // buffer->Packet -= GetHeaderSize();
-  //     // buffer->Length += GetHeaderSize();
-  //     // packet = buffer->Packet;
-
-  //     // packet[0] = 0x45; // Version and HeaderSize
-  //     // packet[1] = 0;    // ToS
-  //     // Pack16(packet, 2, buffer->Length);
-
-  //     // PacketID++;
-  //     // Pack16(packet, 4, PacketID);
-  //     // packet[6] = 0; // Flags & FragmentOffset
-  //     // packet[7] = 0; // rest of FragmentOffset
-
-  //     // packet[8] = 32; // TTL
-  //     // packet[9] = protocol;
-  //     // Pack16(packet, 10, 0); // checksum placeholder
-  //     // PackBytes(packet, 12, sourceIP, 4);
-  //     // PackBytes(packet, 16, targetIP, 4);
-
-  //     // checksum = FCS::Checksum(packet, 20);
-  //     // Pack16(packet, 10, checksum);
-
-  //     // targetMAC = arp_.Protocol2Hardware(targetIP);
-  //     // if (targetMAC != nullptr)
-  //     // {
-  //     //     mac_.Transmit(buffer, targetMAC, 0x0800);
-  //     // }
-  //     // else
-  //     // {
-  //     //     // Could not find mac_ address, arp_ for it
-  //     //     UnresolvedQueue.Put(buffer);
-  //     // }
-  // }
-
-  // void IPv4::Retransmit(const EthBuff *buffer)
-  // {
-  //     // mac_.Retransmit(buffer);
-  // }
-
-  // void IPv4::Retry()
-  //{
-  // int count;
-  // const EthBuff* buffer;
-  // const uint8_t* targetMAC;
-
-  // count = UnresolvedQueue.GetCount();
-  // for (int i = 0; i < count; i++)
-  // {
-  //     buffer = (const EthBuff*)UnresolvedQueue.Get();
-
-  //     targetMAC = arp_.Protocol2Hardware(&buffer->Packet[16]);
-  //     if (targetMAC != nullptr)
-  //     {
-  //         mac_.Transmit(buffer, targetMAC, 0x0800);
-  //     }
-  //     else
-  //     {
-  //         log_.print_log("Still could not find mac_ for IP\n");
-  //         UnresolvedQueue.Put(buffer);
-  //     }
-  // }
-  //}
-
-  // void IPv4::FreeTxBuffer(const EthBuff *buffer)
-  // {
-  //     // mac_.FreeTxBuffer(buffer);
-  // }
-
-  // void IPv4::FreeRxBuffer(const EthBuff *buffer)
-  // {
-  //     // mac_.FreeRxBuffer(buffer);
-  // }
+  void IPv4::SetAddressInfo(const AddressIP4Settings &info)
+  {
+    address_ = info;
+    calcBroadcastAddress();
+  }
 
   // private:
 
-  // bool IPv4::IsLocal(const uint8_t *addr)
-  // {
-  //     bool rc;
-  //     // uint8_t broadcast[] = {0xFF, 0xFF, 0xFF, 0xFF};
-  //     // if (address_.DataValid)
-  //     // {
-  //     //     rc = AddressCompare(addr, broadcast, GetAddressSize()) ||
-  //     //          AddressCompare(addr, GetUnicastAddress(), GetAddressSize()) ||
-  //     //          AddressCompare(addr, GetBroadcastAddress(), GetAddressSize());
-  //     // }
-  //     // else
-  //     // {
-  //     //     rc = AddressCompare(addr, broadcast, GetAddressSize());
-  //     // }
-  //     return rc;
-  // }
+  bool IPv4::IsThisMyAddress(const uint8_t *addr)
+  {
+    return detail::AddressCompare(addr, GetUnicastAddress(), GetAddressSize()) ||
+           detail::AddressCompare(addr, GetBroadcastAddress(), GetAddressSize());
+  }
+
+  void IPv4::calcBroadcastAddress(void)
+  {
+    uint32_t ipAddress = detail::Unpack32(address_.Address, 0);
+    uint32_t subnetMask = detail::Unpack32(address_.SubnetMask, 0);
+    uint32_t broadcastAddress = (ipAddress & subnetMask) | ~subnetMask;
+    detail::Pack32(Broadcast, 0, broadcastAddress);
+  }
 }

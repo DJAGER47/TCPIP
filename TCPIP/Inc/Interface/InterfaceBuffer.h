@@ -1,14 +1,13 @@
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 #include "stm32f7xx_hal.h"
 
 namespace TCPIP
 {
-  class EthBuff
+  struct EthBuff
   {
-  public:
     // next EthBuff in the chain
     EthBuff *next;
     // the full data length of the entire chain

@@ -4,11 +4,10 @@
 namespace TCPIP
 {
 
-  MACEthernet::MACEthernet(ARP &arp, InterfaceIP &ipv4, InterfaceLogger &log) : BroadcastAddress{0xFF},
-                                                                                TxHandler(nullptr), arp_(arp),
+  MACEthernet::MACEthernet(ARP &arp, InterfaceIP &ipv4, InterfaceLogger &log) : TxHandler(nullptr), arp_(arp),
                                                                                 ipv4_(ipv4), log_(log)
   {
-    // memset(BroadcastAddress, 0xFF, GetAddressSize());
+    memset(BroadcastAddress, 0xFF, GetAddressSize());
   }
 
   void MACEthernet::SetUnicastAddress(const uint8_t *addr)
@@ -30,7 +29,7 @@ namespace TCPIP
       switch (type)
       {
       case InterfaceMAC::EtherType::etIPv4:
-        // IPv4.ProcessRx(buffer, GetHeaderSize());
+        ipv4_.ProcessRx(buffer, GetHeaderSize());
         break;
       case InterfaceMAC::EtherType::etARP:
         arp_.ProcessRx(buffer, GetHeaderSize());

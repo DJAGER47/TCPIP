@@ -43,8 +43,11 @@ namespace TCPIP
     else if (info.OPER == reply)
     {
       // Add mac <-> IP to cache
-      Add(info.SPA, info.SHA);
+      AddEntry(info.SPA, info.SHA);
       log_.print_log(InterfaceLogger::INFO, "ARP: Add mac <-> IP to cache\n");
+      log_.print_log(InterfaceLogger::INFO, "ARP: %03d.%03d.%03d.%03d <-> %02x:%02x:%02x:%02x:%02x:%02x to cache\n",
+                     info.SPA[0], info.SPA[1], info.SPA[2], info.SPA[3],
+                     info.SHA[0], info.SHA[1], info.SHA[2], info.SHA[3], info.SHA[4], info.SHA[5]);
     }
     else
     {
@@ -53,41 +56,72 @@ namespace TCPIP
   }
 
   /// @brief Add to cache table
-  /// @param protocolAddress IP address
-  /// @param hardwareAddress MAC address
-  void ARP::Add(const uint8_t *protocolAddress, const uint8_t *hardwareAddress)
+  /// @param ip_address IP address
+  /// @param mac_address MAC address
+  void ARP::AddEntry(const uint8_t *ip_address, const uint8_t *mac_address)
   {
-    UNUSED(protocolAddress);
-    UNUSED(hardwareAddress);
-    log_.print_log(InterfaceLogger::WARNING, "ARP: Realize a cache table\n");
-    log_.print_log(InterfaceLogger::WARNING, "ARP: %03d.%03d.%03d.%03d <-> %02x:%02x:%02x:%02x:%02x:%02x\n",
-                   protocolAddress[0], protocolAddress[1], protocolAddress[2], protocolAddress[3],
-                   hardwareAddress[0], hardwareAddress[1], hardwareAddress[2], hardwareAddress[3], hardwareAddress[4], hardwareAddress[5]);
+    int index = FindEntry(ip_address);
+    if (index != -1)
+    {
+      // update mac
+      memcpy(cache_[index].mac_address, mac_address, MAC_ADDR_SIZE);
+    }
+    else if (num_entries_ < MAX_ENTRIES)
+    {
+      // Add new IP <-> MAC
+      memcpy(cache_[num_entries_].ip_address, ip_address, IP_ADDR_SIZE);
+      memcpy(cache_[num_entries_].mac_address, mac_address, MAC_ADDR_SIZE);
+      ++num_entries_;
+    }
+    else
+    {
+      // the cache is full, let's delete the oldest entry by shifting the entire array
+      memmove(cache_[0].ip_address, cache_[1].ip_address, (MAX_ENTRIES - 1) * IP_ADDR_SIZE);
+      memmove(cache_[0].mac_address, cache_[1].mac_address, (MAX_ENTRIES - 1) * MAC_ADDR_SIZE);
+      memcpy(cache_[MAX_ENTRIES - 1].ip_address, ip_address, IP_ADDR_SIZE);
+      memcpy(cache_[MAX_ENTRIES - 1].mac_address, mac_address, MAC_ADDR_SIZE);
+    }
+  }
+
+  /// @brief Match IP address and MAC address
+  /// @param targetIP IPv4
+  /// @return target MAC
+  const uint8_t *ARP::Ip2Mac(const uint8_t *targetIP)
+  {
+    int index = FindEntry(targetIP);
+    if (index != -1)
+    {
+      return cache_[index].mac_address;
+    }
+    else
+    {
+      return nullptr;
+    }
   }
 
   /// @brief Send a request for MAC address by IP
-  /// @param protocolAddress target IP
-  void ARP::SendRequest(const uint8_t *protocolAddress)
+  /// @param targetIP target IP
+  void ARP::SendRequest(const uint8_t *targetIP)
   {
-    EthBuff *txBuffer = mac_.GetTxBuffer();
-    if (txBuffer == nullptr)
+    EthBuff *txBuf = mac_.GetTxBuffer();
+    if (txBuf == nullptr)
     {
       log_.print_log(InterfaceLogger::WARNING, "ARP: ARP failed to get tx buffer\n");
       return;
     }
-    size_t offset = mac_.GetHeaderSize();
-    offset = detail::Pack16(txBuffer->buff, offset, hardwareType);                                       // Hardware Type
-    offset = detail::Pack16(txBuffer->buff, offset, InterfaceMAC::EtherType::etIPv4);                    // Protocol Type
-    offset = detail::Pack8(txBuffer->buff, offset, mac_.GetAddressSize());                               // Hardware Size
-    offset = detail::Pack8(txBuffer->buff, offset, ip_.GetAddressSize());                                // Protocol Size
-    offset = detail::Pack16(txBuffer->buff, offset, request);                                            // Op
-    offset = detail::PackBytes(txBuffer->buff, offset, mac_.GetUnicastAddress(), mac_.GetAddressSize()); // Sender's Hardware Address
-    offset = detail::PackBytes(txBuffer->buff, offset, ip_.GetUnicastAddress(), ip_.GetAddressSize());   // Sender's Protocol Address
-    offset = detail::PackFill(txBuffer->buff, offset, 0, mac_.GetAddressSize());                         // Target's Hardware Address
-    offset = detail::PackBytes(txBuffer->buff, offset, protocolAddress, 4);                              // Target's Protocol Address
-    txBuffer->tot_len = txBuffer->len = offset;
+    size_t offset = mac_.GetTxOffset();
+    offset = detail::Pack16(txBuf->buff, offset, hardwareType);                                       // Hardware Type
+    offset = detail::Pack16(txBuf->buff, offset, InterfaceMAC::EtherType::etIPv4);                    // Protocol Type
+    offset = detail::Pack8(txBuf->buff, offset, mac_.GetAddressSize());                               // Hardware Size
+    offset = detail::Pack8(txBuf->buff, offset, ip_.GetAddressSize());                                // Protocol Size
+    offset = detail::Pack16(txBuf->buff, offset, request);                                            // Op
+    offset = detail::PackBytes(txBuf->buff, offset, mac_.GetUnicastAddress(), mac_.GetAddressSize()); // Sender's Hardware Address
+    offset = detail::PackBytes(txBuf->buff, offset, ip_.GetUnicastAddress(), ip_.GetAddressSize());   // Sender's Protocol Address
+    offset = detail::PackFill(txBuf->buff, offset, 0, mac_.GetAddressSize());                         // Target's Hardware Address
+    offset = detail::PackBytes(txBuf->buff, offset, targetIP, 4);                                     // Target's Protocol Address
+    txBuf->tot_len = txBuf->len = offset;
 
-    mac_.Transmit(txBuffer, mac_.GetBroadcastAddress(), InterfaceMAC::EtherType::etARP);
+    mac_.Transmit(txBuf, mac_.GetBroadcastAddress(), InterfaceMAC::EtherType::etARP);
   }
 
   // private:
@@ -96,24 +130,39 @@ namespace TCPIP
   /// @param info ARP packet
   void ARP::SendReply(const ARPInfo &info)
   {
-    EthBuff *txBuffer = mac_.GetTxBuffer();
-    if (txBuffer == nullptr)
+    EthBuff *txBuf = mac_.GetTxBuffer();
+    if (txBuf == nullptr)
     {
       log_.print_log(InterfaceLogger::WARNING, "ARP: ARP failed to get tx buffer\n");
       return;
     }
-    size_t offset = mac_.GetHeaderSize();
-    offset = detail::Pack16(txBuffer->buff, offset, info.HTYPE);
-    offset = detail::Pack16(txBuffer->buff, offset, info.PTYPE);
-    offset = detail::Pack8(txBuffer->buff, offset, info.HLEN);
-    offset = detail::Pack8(txBuffer->buff, offset, info.PLEN);
-    offset = detail::Pack16(txBuffer->buff, offset, reply);                                  // ARP Reply
-    offset = detail::PackBytes(txBuffer->buff, offset, mac_.GetUnicastAddress(), info.HLEN); // My mac addres
-    offset = detail::PackBytes(txBuffer->buff, offset, ip_.GetUnicastAddress(), info.PLEN);  // My ip  adress
-    offset = detail::PackBytes(txBuffer->buff, offset, info.SHA, info.HLEN);
-    offset = detail::PackBytes(txBuffer->buff, offset, info.SPA, info.PLEN);
-    txBuffer->tot_len = txBuffer->len = mac_.GetHeaderSize();
+    size_t offset = mac_.GetTxOffset();
+    offset = detail::Pack16(txBuf->buff, offset, info.HTYPE);                             // Hardware Type
+    offset = detail::Pack16(txBuf->buff, offset, info.PTYPE);                             // Protocol Type
+    offset = detail::Pack8(txBuf->buff, offset, info.HLEN);                               // Hardware Size
+    offset = detail::Pack8(txBuf->buff, offset, info.PLEN);                               // Protocol Size
+    offset = detail::Pack16(txBuf->buff, offset, reply);                                  // Op - ARP Reply
+    offset = detail::PackBytes(txBuf->buff, offset, mac_.GetUnicastAddress(), info.HLEN); // My mac addres
+    offset = detail::PackBytes(txBuf->buff, offset, ip_.GetUnicastAddress(), info.PLEN);  // My ip  adress
+    offset = detail::PackBytes(txBuf->buff, offset, info.SHA, info.HLEN);                 // Target's Hardware Address
+    offset = detail::PackBytes(txBuf->buff, offset, info.SPA, info.PLEN);                 // Target's Protocol Address
+    txBuf->tot_len = txBuf->len = offset;
 
-    mac_.Transmit(txBuffer, info.SHA, InterfaceMAC::EtherType::etARP);
+    mac_.Transmit(txBuf, info.SHA, InterfaceMAC::EtherType::etARP);
+  }
+
+  /// @brief Search the cache entry by IP address
+  /// @param ip_address
+  /// @return >0 number in the table, -1 error
+  int ARP::FindEntry(const uint8_t *ip_address) const
+  {
+    for (int i = 0; i < num_entries_; i++)
+    {
+      if (std::memcmp(cache_[i].ip_address, ip_address, IP_ADDR_SIZE) == 0)
+      {
+        return i;
+      }
+    }
+    return -1;
   }
 }

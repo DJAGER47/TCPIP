@@ -1,45 +1,42 @@
-
-
 #include "ICMP.h"
-
-// #include <stdio.h>
-#include "IPv4.h"
 #include "Utility.h"
-#include "InterfaceBuffer.h"
 
 namespace TCPIP
 {
-  void ICMP::ProcessRx(const EthBuff *buffer, const uint8_t *remoteIP, const uint8_t *)
+  void ICMP::ProcessRx(const EthBuff *buffer, size_t offset, const uint8_t *sourceIP)
   {
-    uint8_t type;
-    // uint8_t code;
-    // const EthBuff *txBuffer;
-    // uint16_t i;
+    const uint8_t *packet = buffer->buff + offset;
+    ICMPInfo info;
+    info.type = packet[0];
+    info.code = packet[1];
+    info.checksum = 0;
 
-    type = buffer->buff[0];
-    // code = buffer->Packet[1];
-
-    switch (type)
+    switch (info.type)
     {
-    case 8: // echo request
-      // txBuffer = IP.GetTxBuffer(buffer->MAC);
-      // if (txBuffer && buffer->Length <= txBuffer->Remainder)
-      // {
-      //     for (i = 0; i < buffer->Length; i++)
-      //     {
-      //         txBuffer->Packet[i] = buffer->Packet[i];
-      //     }
-      //     txBuffer->Packet[0] = 0;
-      //     Pack16(txBuffer->Packet, 2, 0); // clear the checksum
-      //     i = detail::CalculateIcmpChecksum(txBuffer->Packet, buffer->Length);
-      //     Pack16(txBuffer->Packet, 2, i); // set the checksum
-      //     txBuffer->Length = buffer->Length;
-      //     IP.Transmit(txBuffer, 0x01, remoteIP, IP.GetUnicastAddress());
-      // }
-      break;
+    case Icmp_ECHO: // echo request
+    {
+      info.id = detail::Unpack16(packet, 4);
+      info.seqnum = detail::Unpack16(packet, 6);
+
+      EthBuff *txBuf = ip_.GetTxBuffer();
+      if (txBuf == nullptr)
+      {
+        log_.print_log(InterfaceLogger::WARNING, "ICMP: ICMP failed to get tx buffer\n");
+        return;
+      }
+      size_t offset = ip_.GetTxOffset();
+      offset = detail::Pack8(txBuf->buff, offset, Icmp_ER);
+      offset = detail::Pack8(txBuf->buff, offset, 0);
+      offset = detail::Pack16(txBuf->buff, offset, detail::CalculateChecksum(txBuf->buff + ip_.GetTxOffset(), 2));
+      txBuf->tot_len = txBuf->len = offset;
+
+      ip_.Transmit(txBuf, InterfaceIP::Protocol::pICMP, sourceIP, ip_.GetUnicastAddress());
+    }
+    break;
+
     default:
+      log_.print_log(InterfaceLogger::WARNING, "ICMP: Unsupported ICMP Protocol 0x%02X\n", info.type);
       break;
     }
   }
-
 }

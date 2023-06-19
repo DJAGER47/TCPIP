@@ -71,7 +71,11 @@ namespace TCPIP
       return false;
     }
 
-    uint16_t CalculateIcmpChecksum(const uint8_t *buffer, int size)
+    /// @brief ICMP, IPv4
+    /// @param buffer 
+    /// @param size 
+    /// @return 
+    uint16_t CalculateChecksum(const uint8_t *buffer, int size)
     {
       uint32_t sum = 0;
       while (size > 1)

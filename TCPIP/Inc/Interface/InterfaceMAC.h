@@ -29,6 +29,7 @@ namespace TCPIP
     virtual void Transmit(EthBuff *buffer, const uint8_t *targetMAC, uint16_t type) = 0;
 
     virtual EthBuff *GetTxBuffer() = 0;
+    virtual size_t GetTxOffset() = 0;
     virtual EthBuff *GetRXBuffer() = 0;
     virtual void FreeTxBuffer(EthBuff *) = 0;
     virtual void FreeRxBuffer(EthBuff *) = 0;

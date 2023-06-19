@@ -1,7 +1,8 @@
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 #include "InterfaceBuffer.h"
 
 namespace TCPIP
@@ -11,7 +12,11 @@ namespace TCPIP
   class stupidAllocator : public Allocator
   {
   public:
-    stupidAllocator() = default;
+    stupidAllocator()
+    {
+      for (size_t i = 0; i < sizeof(isFree); ++i)
+        isFree[i] = true;
+    };
 
     void release(EthBuff *ptr)
     {
@@ -43,7 +48,6 @@ namespace TCPIP
 
   private:
     EthBuff cache[length];
-    bool isFree[length] = {true};
-    size_t index = 0;
+    bool isFree[length];
   };
 }

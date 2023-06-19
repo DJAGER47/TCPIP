@@ -9,7 +9,7 @@
 
 namespace TCPIP
 {
-  class MACEthernet : public InterfaceMAC
+  class MACEthernet : public InterfaceMAC // https://en.wikipedia.org/wiki/Ethernet
   {
   private:
     static const uint8_t sizeBuffers = 10; // the size of the reception/transmission buffers
@@ -34,6 +34,7 @@ namespace TCPIP
     void Transmit(EthBuff *buffer, const uint8_t *targetMAC, uint16_t type);
 
     EthBuff *GetTxBuffer() { return Tx_.allocate(); };
+    size_t GetTxOffset() { return HEADER_SIZE; };
     EthBuff *GetRXBuffer() { return Rx_.allocate(); };
     void FreeTxBuffer(EthBuff *p) { return Tx_.release(p); };
     void FreeRxBuffer(EthBuff *p) { return Rx_.release(p); };
@@ -42,14 +43,15 @@ namespace TCPIP
 
   private:
     uint8_t UnicastAddress[ADDRESS_SIZE];
-    uint8_t BroadcastAddress[ADDRESS_SIZE] = {0xFF};
+    uint8_t BroadcastAddress[ADDRESS_SIZE];
 
     DataTransmitHandler TxHandler;
+    stupidAllocator<sizeBuffers> Rx_; // Memory allocator for reception
+    stupidAllocator<sizeBuffers> Tx_; // Memory allocator for transmission
+    
     ARP &arp_;
     InterfaceIP &ipv4_;
     InterfaceLogger &log_;
-    stupidAllocator<sizeBuffers> Rx_; // Memory allocator for reception
-    stupidAllocator<sizeBuffers> Tx_; // Memory allocator for transmission
 
     bool IsThisMyAddress(const uint8_t *addr);
   };

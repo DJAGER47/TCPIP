@@ -58,6 +58,7 @@ void low_level_init()
 
   gRxSemaphore = xSemaphoreCreateBinary();
   gTxSemaphore = xSemaphoreCreateBinary();
+  osSemaphoreRelease(gTxSemaphore);
 
   osThreadDef(Read, readEth, osPriorityRealtime, 0, configMINIMAL_STACK_SIZE * 2);
   osThreadCreate(osThread(Read), NULL);
@@ -171,6 +172,7 @@ void readEth(void const *argument)
         }
         else
         {
+          _printf_mac("r break\n");
           break;
         }
       }

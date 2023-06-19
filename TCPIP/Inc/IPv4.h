@@ -1,21 +1,23 @@
-
-
 #pragma once
 
-#include <cstdint>
-#include <cstddef>
-#include <array>
-
 #include "InterfaceIP.h"
-
-// #include "ARP.h"
-// #include "ICMP.h"
+#include "InterfaceMAC.h"
+#include "InterfaceLogger.h"
+#include "ARP.h"
+#include "ICMP.h"
 
 namespace TCPIP
 {
-  class IPv4 : public InterfaceIP
+
+  class ARP;
+  class ICMP;
+
+  class IPv4 : public InterfaceIP // https://en.wikipedia.org/wiki/Internet_Protocol_version_4
   {
   private:
+    static const uint8_t IpVersion = 4;
+    static const uint8_t IpDefHeaderLength = 5;
+
     static const uint8_t ADDRESS_SIZE = 4;
     static const uint8_t HEADER_SIZE = 20;
 
@@ -27,53 +29,51 @@ namespace TCPIP
       uint8_t Gateway[ADDRESS_SIZE];
     };
 
-    IPv4(){};
-    // IPv4() = delete;
-    // IPv4(IPv4 &) = delete;
-    // IPv4(InterfaceMAC &mac, ARP &arp, ICMP &icmp);
-    void ProcessRx(EthBuff *);
-    // const EthBuff *GetTxBuffer(InterfaceMAC *);
-    // void Transmit(const EthBuff *, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP);
-    // void Retransmit(const EthBuff *);
-    // void Retry();
+    typedef struct 
+    {
+      uint8_t Version : 4;        // Version - 4 bits
+      uint8_t IHL : 4;            // Header Length - 4 bits
+      uint8_t TypeOfService;      // Type of Service - 8 bits
+      uint16_t TotalLength;       // TotalLength - 16 bits
+      uint16_t Identification;    // Identification - 16 bits
+      uint8_t Flags : 3;          // Flags - 3 bits
+      uint16_t FragmentOffset : 13;// FragmentOffset - 13 bits
+      uint8_t TTL;                // TTL - 8 bits
+      uint8_t Protocol;           // Protocol - 8 bits
+      uint16_t Crc;               // HeaderChecksum - 16 bits
+      const uint8_t *sourceIP;    // 32 bits
+      const uint8_t *targetIP;    // 32 bits
+    }HeaderIPv4;
 
-    // void FreeTxBuffer(const EthBuff *);
-    // void FreeRxBuffer(const EthBuff *);
+    IPv4() = delete;
+    IPv4(IPv4 &) = delete;
+    IPv4(InterfaceMAC &mac, ARP &arp, ICMP &icmp, InterfaceLogger &log) : PacketID(0), mac_(mac), arp_(arp), icmp_(icmp), log_(log){};
+
+    void ProcessRx(const EthBuff *buffer, size_t offset);
+    void Transmit(EthBuff *, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP);
+
+    EthBuff *GetTxBuffer() { return mac_.GetTxBuffer(); };
+    size_t GetTxOffset() { return mac_.GetTxOffset() + HEADER_SIZE; };
     uint8_t GetHeaderSize() const { return HEADER_SIZE; }
     uint8_t GetAddressSize() const { return ADDRESS_SIZE; }
     const uint8_t *GetUnicastAddress() const { return address_.Address; }
+    const uint8_t *GetBroadcastAddress() const { return Broadcast; }
     const uint8_t *GetGatewayAddress() const { return address_.Gateway; }
     const uint8_t *GetSubnetMask() const { return address_.SubnetMask; }
-    void SetAddressInfo(const AddressIP4Settings &info) { address_ = info; }
+
+    void SetAddressInfo(const AddressIP4Settings &info);
 
   private:
-    // Version - 4 bits
-    // Header Length - 4 bits
-    // Type of Service - 8 bits
-    // TotalLength - 16 bits
-    // Identification - 16 bits
-    // Flags - 3 bits
-    // FragmentOffset - 13 bits
-    // TTL - 8 bits
-    // Protocol - 8 bits
-    // HeaderChecksum - 16 bits
-
-    struct blok
-    {
-      uint8_t Version : 4;
-      uint8_t IHL : 4;
-    };
-
-    // bool IsLocal(const uint8_t *addr);
-
-    // uint16_t PacketID;
-    // void *TxBuffer[20];
-    // osQueue UnresolvedQueue;
-
     AddressIP4Settings address_;
-    // InterfaceMAC &mac_;
-    // ARP &arp_;
-    // ICMP &icmp_;
-  };
+    uint8_t Broadcast[ADDRESS_SIZE];
+    uint16_t PacketID;
 
+    InterfaceMAC &mac_;
+    ARP &arp_;
+    ICMP &icmp_;
+    InterfaceLogger &log_;
+
+    bool IsThisMyAddress(const uint8_t *addr);
+    void calcBroadcastAddress(void);
+  };
 }
