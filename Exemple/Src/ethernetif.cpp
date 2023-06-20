@@ -212,7 +212,7 @@ void HAL_ETH_ErrorCallback(ETH_HandleTypeDef *heth)
 void HAL_ETH_RxAllocateCallback(uint8_t **buff)
 {
   _printf_mac("IRQ RxAllocateCallback\n");
-  auto p = gDStack.mac_.GetRXBuffer();
+  auto p = gDStack.mac_.GetRxBuffer();
   *buff = p->buff;
 }
 

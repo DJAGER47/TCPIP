@@ -10,12 +10,13 @@
     "initializer_list": "cpp",
     "utility": "cpp",
     "cstdlib": "cpp",
-    "cstdint": "cpp"
+    "cstdint": "cpp",
+    "memory_resource": "cpp"
   },
   "editor.tabSize": 2,
-  // "cmake.sourceDirectory": "/media/sf_C_DRIVE/Users/p.lavrovskiy/YandexDisk/Praktikum/yandex_tests/Task/Tests",
-  // "cmake.sourceDirectory": "/media/sf_C_DRIVE/Users/p.lavrovskiy/YandexDisk/Praktikum/yandex_tests/Task/Exemple",
+  // "cmake.sourceDirectory": "/media/sf_C_DRIVE/Task/Tests",
+  // "cmake.sourceDirectory": "/media/sf_C_DRIVE/Task/Exemple",
 
-  // "cmake.sourceDirectory": "C:/Users/p.lavrovskiy/YandexDisk/Praktikum/yandex_tests/Task/Tests",
-  "cmake.sourceDirectory": "C:/Users/p.lavrovskiy/YandexDisk/Praktikum/yandex_tests/Task/Exemple",
+  // "cmake.sourceDirectory": "C:/Task/Tests",
+  // "cmake.sourceDirectory": "C:/Task/Exemple",
 }

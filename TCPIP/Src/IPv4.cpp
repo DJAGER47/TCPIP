@@ -39,6 +39,7 @@ namespace TCPIP
       switch (head.Protocol)
       {
       case InterfaceIP::Protocol::pICMP:
+        log_.print_log(InterfaceLogger::INFO, "IPv4: ICMP\n");
         icmp_.ProcessRx(buffer, offset + HEADER_SIZE, head.sourceIP);
         break;
 
@@ -71,9 +72,7 @@ namespace TCPIP
     detail::Pack16(packet, 10, 0);                                                            // checksum
     detail::PackBytes(packet, 12, sourceIP, ADDRESS_SIZE);
     detail::PackBytes(packet, 16, targetIP, ADDRESS_SIZE);
-
-    uint16_t checksum = detail::CalculateChecksum(packet, HEADER_SIZE);
-    detail::Pack16(packet, 10, checksum);
+    detail::Pack16(packet, 10, detail::CalculateChecksum(packet, HEADER_SIZE));
 
     const uint8_t *targetMAC = arp_.Ip2Mac(targetIP);
     if (targetMAC != nullptr)

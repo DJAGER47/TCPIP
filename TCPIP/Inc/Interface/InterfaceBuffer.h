@@ -2,7 +2,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include "stm32f7xx_hal.h"
+
+#define ETH_MAX_PACKET_SIZE    (1524U)
 
 namespace TCPIP
 {

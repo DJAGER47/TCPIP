@@ -35,7 +35,7 @@ namespace TCPIP
 
     EthBuff *GetTxBuffer() { return Tx_.allocate(); };
     size_t GetTxOffset() { return HEADER_SIZE; };
-    EthBuff *GetRXBuffer() { return Rx_.allocate(); };
+    EthBuff *GetRxBuffer() { return Rx_.allocate(); };
     void FreeTxBuffer(EthBuff *p) { return Tx_.release(p); };
     void FreeRxBuffer(EthBuff *p) { return Rx_.release(p); };
 

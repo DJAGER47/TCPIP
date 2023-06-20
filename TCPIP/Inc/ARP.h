@@ -48,7 +48,7 @@ namespace TCPIP
   public:
     ARP() = delete;
     ARP(ARP &) = delete;
-    ARP(InterfaceMAC &mac, IPv4 &ip, InterfaceLogger &log) : mac_(mac), ip_(ip), log_(log){};
+    ARP(InterfaceMAC &mac, IPv4 &ip, InterfaceLogger &log) : num_entries_(0), mac_(mac), ip_(ip), log_(log){};
 
     void ProcessRx(const EthBuff *buffer, size_t offset);
     void AddEntry(const uint8_t *ip_address, const uint8_t *mac_address);

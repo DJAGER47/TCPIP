@@ -5,7 +5,7 @@ namespace TCPIP
 {
   /// @brief The function processes incoming ICMP packets and sends an ICMP echo reply if the packet is an echo request.
   /// @param buffer A pointer to an EthBuff object, which contains the received Ethernet frame.
-  /// @param offset The offset parameter is the starting position of the ICMP packet within the Ethernet buffer. 
+  /// @param offset The offset parameter is the starting position of the ICMP packet within the Ethernet buffer.
   /// It is used to locate the ICMP packet within the buffer.
   /// @param sourceIP The source IP address of the received ICMP packet.
   void ICMP::ProcessRx(const EthBuff *buffer, size_t offset, const uint8_t *sourceIP)
@@ -13,8 +13,14 @@ namespace TCPIP
     const uint8_t *packet = buffer->buff + offset;
     ICMPInfo info;
     info.type = packet[0];
-    info.code = packet[1];
-    info.checksum = 0;
+    // info.code = packet[1];
+    // info.checksum = detail::Unpack16(packet, 2);
+
+    if (detail::CalculateChecksum(packet, buffer->tot_len - offset))
+    {
+      log_.print_log(InterfaceLogger::ERROR, "ICMP: CRC is not correct\n");
+      return;
+    }
 
     switch (info.type)
     {
@@ -29,9 +35,13 @@ namespace TCPIP
       size_t offset = ip_.GetTxOffset();
       offset = detail::Pack8(txBuf->buff, offset, Icmp_ER);
       offset = detail::Pack8(txBuf->buff, offset, 0);
-      offset = detail::Pack16(txBuf->buff, offset, detail::CalculateChecksum(txBuf->buff + ip_.GetTxOffset(), 2));
+      offset = detail::Pack16(txBuf->buff, offset, 0); // CRC
       offset = detail::PackBytes(txBuf->buff, offset, packet + 4, buffer->tot_len - offset);
       txBuf->tot_len = txBuf->len = offset;
+
+      // offset = ip_.GetTxOffset();
+      // uint16_t crc = detail::CalculateChecksum(txBuf->buff + offset, txBuf->len - offset);
+      // detail::Pack16(txBuf->buff, offset + 2, ((crc & 0xff00) >> 8) | ((crc & 0x00ff) << 8));
 
       ip_.Transmit(txBuf, InterfaceIP::Protocol::pICMP, sourceIP, ip_.GetUnicastAddress());
     }

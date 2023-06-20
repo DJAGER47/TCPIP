@@ -8,7 +8,7 @@
             "name": "Debug Test1 Linux",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/Tests/Debug/testArp",
+            "program": "${workspaceFolder}/Tests/Debug/testStack",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

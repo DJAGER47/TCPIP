@@ -37,14 +37,15 @@ namespace TCPIP
       switch (type)
       {
       case InterfaceMAC::EtherType::etIPv4:
+        log_.print_log(InterfaceLogger::INFO, "MAC: IPv4\n");
         ipv4_.ProcessRx(buffer, GetHeaderSize());
         break;
       case InterfaceMAC::EtherType::etARP:
+        log_.print_log(InterfaceLogger::INFO, "MAC: ARP\n");
         arp_.ProcessRx(buffer, GetHeaderSize());
         break;
       default:
-        log_.print_log(InterfaceLogger::WARNING,
-                       "MAC: Unsupported Unicast type 0x%04X\n", type);
+        log_.print_log(InterfaceLogger::WARNING, "MAC: Unsupported Unicast type 0x%04X\n", type);
         break;
       }
     }
@@ -64,9 +65,10 @@ namespace TCPIP
     offset = detail::PackBytes(buffer->buff, offset, UnicastAddress, ADDRESS_SIZE);
     detail::Pack16(buffer->buff, offset, type);
 
-    if (buffer->tot_len < min_payload)
+    if (buffer->tot_len < (min_payload + HEADER_SIZE))
     {
-      memset(buffer->buff + buffer->tot_len, 0, min_payload - buffer->tot_len);
+      memset(buffer->buff + buffer->tot_len, 0, (min_payload + HEADER_SIZE) - buffer->tot_len);
+      buffer->tot_len = buffer->len = min_payload + HEADER_SIZE; 
     }
 
     if (TxHandler)

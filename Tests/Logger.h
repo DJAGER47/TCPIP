@@ -7,15 +7,17 @@
 class Logger : public TCPIP::InterfaceLogger
 {
 public:
-  int _printf(Type type, const char *sFormat, ...)
+  int print_log(Type type, const char *sFormat, ...)
   {
     int r;
     va_list ParamList;
     va_start(ParamList, sFormat);
-    if (type == InterfaceLogger::WARNING)
-      printf("WARNING ");
-    else
-      printf("ERROR   ");
+    if (type == InterfaceLogger::INFO)
+      printf("INFO   : ");
+    else if (type == InterfaceLogger::WARNING)
+      printf("WARNING: ");
+    else if (type == InterfaceLogger::ERROR)
+      printf("ERROR  : ");
 
     r = vprintf(sFormat, ParamList);
     va_end(ParamList);
