@@ -5,6 +5,12 @@ namespace TCPIP
 {
 
   // public:
+
+  /// @brief The function processes an incoming IPv4 packet, extracts its header information, checks its
+  /// checksum, and forwards it to the appropriate protocol handler based on its protocol field.
+  /// @param buffer A pointer to an EthBuff object, which contains the Ethernet frame buffer.
+  /// @param offset The offset parameter is the starting position of the IPv4 header in the Ethernet
+  /// buffer.
   void IPv4::ProcessRx(const EthBuff *buffer, size_t offset)
   {
     const uint8_t *packet = buffer->buff + offset;
@@ -43,20 +49,26 @@ namespace TCPIP
     }
   }
 
+  /// @brief The Transmit function sends an IPv4 packet with a specified protocol, target IP, and source IP using Ethernet.
+  /// @param buffer A pointer to an EthBuff object, which contains the Ethernet frame buffer to be transmitted.
+  /// @param protocol The protocol field in the IPv4 header, indicating the protocol used in the data
+  /// portion of the IP datagram. Examples include TCP, UDP, ICMP, etc.
+  /// @param targetIP A pointer to an array of 4 bytes representing the destination IPv4 address.
+  /// @param sourceIP The source IP address of the IPv4 packet to be transmitted.
   void IPv4::Transmit(EthBuff *buffer, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP)
   {
     size_t offset = mac_.GetTxOffset();
     uint8_t *packet = buffer->buff + offset;
 
-    packet[0] = (IpVersion << 4) | (IpDefHeaderLength);                // Version and HeaderSize
-    packet[1] = 0;                                                     // Type of Service
-    detail::Pack16(packet, 2, static_cast<uint16_t>(buffer->tot_len)); // TotalLength
-    detail::Pack16(packet, 4, ++PacketID);                             // Identification
-    packet[6] = 0;                                                     // Flags & FragmentOffset
-    packet[7] = 0;                                                     // FragmentOffset
-    packet[8] = 32;                                                    // TTL
-    packet[9] = protocol;                                              // Protocol
-    detail::Pack16(packet, 10, 0);                                     // checksum
+    packet[0] = (IpVersion << 4) | (IpDefHeaderLength);                                       // Version and HeaderSize
+    packet[1] = 0;                                                                            // Type of Service
+    detail::Pack16(packet, 2, static_cast<uint16_t>(buffer->tot_len - mac_.GetHeaderSize())); // TotalLength
+    detail::Pack16(packet, 4, ++PacketID);                                                    // Identification
+    packet[6] = 0;                                                                            // Flags & FragmentOffset
+    packet[7] = 0;                                                                            // FragmentOffset
+    packet[8] = 32;                                                                           // TTL
+    packet[9] = protocol;                                                                     // Protocol
+    detail::Pack16(packet, 10, 0);                                                            // checksum
     detail::PackBytes(packet, 12, sourceIP, ADDRESS_SIZE);
     detail::PackBytes(packet, 16, targetIP, ADDRESS_SIZE);
 
@@ -74,6 +86,9 @@ namespace TCPIP
     }
   }
 
+  /// @brief The function sets the IPv4 address information and calculates the broadcast address.
+  /// @param info AddressIP4Settings object that contains information about the IPv4 address, such as the
+  /// network address, subnet mask, and host address.
   void IPv4::SetAddressInfo(const AddressIP4Settings &info)
   {
     address_ = info;
@@ -82,12 +97,15 @@ namespace TCPIP
 
   // private:
 
+  /// @brief The function checks if a given IPv4 address matches the unicast or broadcast address of the current object.
+  /// @param addr A pointer to an array of 4 bytes representing an IPv4 address.
   bool IPv4::IsThisMyAddress(const uint8_t *addr)
   {
     return detail::AddressCompare(addr, GetUnicastAddress(), GetAddressSize()) ||
            detail::AddressCompare(addr, GetBroadcastAddress(), GetAddressSize());
   }
 
+  /// @brief The function calculates the broadcast address for an IPv4 address.
   void IPv4::calcBroadcastAddress(void)
   {
     uint32_t ipAddress = detail::Unpack32(address_.Address, 0);

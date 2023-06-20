@@ -114,6 +114,7 @@ void low_level_init()
 void writeEth(TCPIP::EthBuff *data)
 {
   osSemaphoreWait(gTxSemaphore, osWaitForever);
+  _printf_mac("WriteData\n");
 
   ETH_BufferTypeDef Txbuffer[ETH_TX_DESC_CNT];
   memset(Txbuffer, 0, ETH_TX_DESC_CNT * sizeof(ETH_BufferTypeDef));
@@ -248,8 +249,7 @@ void HAL_ETH_RxLinkCallback(void **pStart, void **pEnd, uint8_t *buff, uint16_t 
 void HAL_ETH_TxFreeCallback(uint32_t *buff)
 {
   _printf_mac("IRQ TxFreeCallback\n");
-  // calculate the address EthBuff
-  TCPIP::EthBuff *p = (TCPIP::EthBuff *)(buff - offsetof(TCPIP::EthBuff, buff));
+  TCPIP::EthBuff *p = reinterpret_cast<TCPIP::EthBuff *>(buff);
   gDStack.mac_.FreeTxBuffer(p);
 }
 

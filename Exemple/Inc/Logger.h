@@ -22,11 +22,11 @@ public:
     osMutexWait(mutex_id, osWaitForever);
 
     if (type == InterfaceLogger::INFO)
-      _printf("%sINFO    :%s", RTT_CTRL_TEXT_GREEN, RTT_CTRL_RESET);
+      _printf("%sINFO   : %s", RTT_CTRL_TEXT_GREEN, RTT_CTRL_RESET);
     else if (type == InterfaceLogger::WARNING)
-      _printf("%sWARNING :%s", RTT_CTRL_TEXT_YELLOW, RTT_CTRL_RESET);
+      _printf("%sWARNING: %s", RTT_CTRL_TEXT_YELLOW, RTT_CTRL_RESET);
     else if (type == InterfaceLogger::ERROR)
-      _printf("%sERROR   :%s", RTT_CTRL_TEXT_RED, RTT_CTRL_RESET);
+      _printf("%sERROR  : %s", RTT_CTRL_TEXT_RED, RTT_CTRL_RESET);
 
     va_list ParamList;
     va_start(ParamList, sFormat);

@@ -5,9 +5,10 @@ namespace TCPIP
 {
   // public:
 
-  /// @brief Parsing the package
-  /// @param buffer picket data
-  /// @param offset offset of ARP message data
+  /// @brief The function processes an ARP packet received by the device and takes appropriate actions based on
+  /// the type of ARP operation.
+  /// @param buffer A pointer to an EthBuff object, which contains the Ethernet frame buffer.
+  /// @param offset The offset parameter is the starting position of the ARP packet within the Ethernet buffer.
   void ARP::ProcessRx(const EthBuff *buffer, size_t offset)
   {
     ARPInfo info;
@@ -35,6 +36,7 @@ namespace TCPIP
         if (detail::AddressCompare(info.TPA, ip_.GetUnicastAddress(), ip_.GetAddressSize()))
         {
           // This ARP is for me
+          AddEntry(info.SPA, info.SHA);
           SendReply(info);
           log_.print_log(InterfaceLogger::INFO, "ARP: This ARP is for me\n");
         }
@@ -44,10 +46,6 @@ namespace TCPIP
     {
       // Add mac <-> IP to cache
       AddEntry(info.SPA, info.SHA);
-      log_.print_log(InterfaceLogger::INFO, "ARP: Add mac <-> IP to cache\n");
-      log_.print_log(InterfaceLogger::INFO, "ARP: %03d.%03d.%03d.%03d <-> %02x:%02x:%02x:%02x:%02x:%02x to cache\n",
-                     info.SPA[0], info.SPA[1], info.SPA[2], info.SPA[3],
-                     info.SHA[0], info.SHA[1], info.SHA[2], info.SHA[3], info.SHA[4], info.SHA[5]);
     }
     else
     {
@@ -55,11 +53,15 @@ namespace TCPIP
     }
   }
 
-  /// @brief Add to cache table
-  /// @param ip_address IP address
-  /// @param mac_address MAC address
+  /// @brief The function adds an IP-MAC address pair to the ARP cache, updating an existing entry if it
+  /// exists, and deleting the oldest entry if the cache is full.
+  /// @param ip_address A pointer to an array of 4 bytes representing an IPv4 address in network byte order.
+  /// @param mac_address A pointer to an array of 6 bytes representing the MAC address to be added to the ARP cache.
   void ARP::AddEntry(const uint8_t *ip_address, const uint8_t *mac_address)
   {
+    log_.print_log(InterfaceLogger::INFO, "ARP: %03d.%03d.%03d.%03d <-> %02x:%02x:%02x:%02x:%02x:%02x to cache\n",
+                   ip_address[0], ip_address[1], ip_address[2], ip_address[3],
+                   mac_address[0], mac_address[1], mac_address[2], mac_address[3], mac_address[4], mac_address[5]);
     int index = FindEntry(ip_address);
     if (index != -1)
     {
@@ -83,9 +85,13 @@ namespace TCPIP
     }
   }
 
-  /// @brief Match IP address and MAC address
-  /// @param targetIP IPv4
-  /// @return target MAC
+  /// @brief The function returns the MAC address corresponding to a given IP address if it is present in the
+  /// cache, otherwise it returns a null pointer.
+  /// @param targetIP The targetIP parameter is a pointer to an array of 4 bytes representing the IP
+  /// address of the device whose MAC address is being requested.
+  /// @return The function `Ip2Mac` returns a pointer to a `uint8_t` array, which represents the MAC
+  /// address of the device with the specified IP address. If the IP address is not found in the ARP
+  /// cache, the function returns a null pointer.
   const uint8_t *ARP::Ip2Mac(const uint8_t *targetIP)
   {
     int index = FindEntry(targetIP);
@@ -99,8 +105,10 @@ namespace TCPIP
     }
   }
 
-  /// @brief Send a request for MAC address by IP
-  /// @param targetIP target IP
+  /// @brief The SendRequest function sends an ARP request to a target IP address using the Ethernet buffer and
+  /// MAC address.
+  /// @param targetIP A pointer to a uint8_t array representing the IP address of the target device to
+  /// which an ARP request is being sent.
   void ARP::SendRequest(const uint8_t *targetIP)
   {
     EthBuff *txBuf = mac_.GetTxBuffer();
@@ -126,8 +134,10 @@ namespace TCPIP
 
   // private:
 
-  /// @brief Reply to Mac Address Request
-  /// @param info ARP packet
+  /// @brief  The function sends an ARP reply message with the provided information.
+  /// @param info A reference to an ARPInfo struct that contains information about the ARP request that
+  /// this reply is in response to. This includes the target's hardware and protocol addresses (SHA and
+  /// SPA), as well as the hardware and protocol types and sizes (HTYPE, PTYPE, HLEN, and PLEN).
   void ARP::SendReply(const ARPInfo &info)
   {
     EthBuff *txBuf = mac_.GetTxBuffer();
@@ -151,9 +161,11 @@ namespace TCPIP
     mac_.Transmit(txBuf, info.SHA, InterfaceMAC::EtherType::etARP);
   }
 
-  /// @brief Search the cache entry by IP address
-  /// @param ip_address
-  /// @return >0 number in the table, -1 error
+  /// @brief The function searches for an entry in an ARP cache based on an IP address and returns its index if
+  /// found, or -1 if not found.
+  /// @param ip_address A pointer to an array of uint8_t representing an IP address.
+  /// @return an integer value, which is the index of the entry in the ARP cache that matches the given IP
+  /// address. If no matching entry is found, the function returns -1.
   int ARP::FindEntry(const uint8_t *ip_address) const
   {
     for (int i = 0; i < num_entries_; i++)
