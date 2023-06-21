@@ -9,9 +9,8 @@ namespace TCPIP
   /// @brief The function processes an incoming IPv4 packet, extracts its header information, checks its
   /// checksum, and forwards it to the appropriate protocol handler based on its protocol field.
   /// @param buffer A pointer to an EthBuff object, which contains the Ethernet frame buffer.
-  /// @param offset The offset parameter is the starting position of the IPv4 header in the Ethernet
-  /// buffer.
-  void IPv4::ProcessRx(const EthBuff *buffer, size_t offset)
+  /// @param offset The offset parameter is the starting position of the IPv4 header in the Ethernet buffer.
+  TErr IPv4::ProcessRx(const EthBuff *buffer, size_t offset)
   {
     const uint8_t *packet = buffer->buff + offset;
     HeaderIPv4 head;
@@ -30,8 +29,11 @@ namespace TCPIP
 
     if (detail::CalculateChecksum(packet, HEADER_SIZE))
     {
-      log_.print_log(InterfaceLogger::ERROR, "IPv4: CRC is not correct\n");
-      return;
+      if (log_ != nullptr)
+      {
+        log_->print_log(InterfaceLogger::ERROR, "IPv4: CRC is not correct\n");
+      }
+      return eCRC;
     }
 
     if (IsThisMyAddress(head.targetIP))
@@ -39,15 +41,25 @@ namespace TCPIP
       switch (head.Protocol)
       {
       case InterfaceIP::Protocol::pICMP:
-        log_.print_log(InterfaceLogger::INFO, "IPv4: ICMP\n");
-        icmp_.ProcessRx(buffer, offset + HEADER_SIZE, head.sourceIP);
+        if (log_ != nullptr)
+        {
+          log_->print_log(InterfaceLogger::INFO, "IPv4: ICMP\n");
+        }
+        if (icmp_ != nullptr)
+        {
+          icmp_->ProcessRx(buffer, offset + HEADER_SIZE, head.sourceIP);
+        }
         break;
 
       default:
-        log_.print_log(InterfaceLogger::WARNING, "IPv4: Unsupported IP Protocol 0x%02X\n", head.Protocol);
+        if (log_ != nullptr)
+        {
+          log_->print_log(InterfaceLogger::WARNING, "IPv4: Unsupported IP Protocol 0x%02X\n", head.Protocol);
+        }
         break;
       }
     }
+    return eOk;
   }
 
   /// @brief The Transmit function sends an IPv4 packet with a specified protocol, target IP, and source IP using Ethernet.
@@ -56,7 +68,7 @@ namespace TCPIP
   /// portion of the IP datagram. Examples include TCP, UDP, ICMP, etc.
   /// @param targetIP A pointer to an array of 4 bytes representing the destination IPv4 address.
   /// @param sourceIP The source IP address of the IPv4 packet to be transmitted.
-  void IPv4::Transmit(EthBuff *buffer, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP)
+  TErr IPv4::Transmit(EthBuff *buffer, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP)
   {
     size_t offset = mac_.GetTxOffset();
     uint8_t *packet = buffer->buff + offset;
@@ -81,8 +93,12 @@ namespace TCPIP
     }
     else
     {
-      log_.print_log(InterfaceLogger::WARNING, "IPv4: Can't send it, don't know MAC\n");
+      if (log_ != nullptr)
+      {
+        log_->print_log(InterfaceLogger::WARNING, "IPv4: Can't send it, don't know MAC\n");
+      }
     }
+    return eOk;
   }
 
   /// @brief The function sets the IPv4 address information and calculates the broadcast address.

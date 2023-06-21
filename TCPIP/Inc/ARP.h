@@ -48,12 +48,12 @@ namespace TCPIP
   public:
     ARP() = delete;
     ARP(ARP &) = delete;
-    ARP(InterfaceMAC &mac, IPv4 &ip, InterfaceLogger &log) : num_entries_(0), mac_(mac), ip_(ip), log_(log){};
+    ARP(InterfaceMAC &mac, IPv4 &ip, InterfaceLogger *log = nullptr) : num_entries_(0), mac_(mac), ip_(ip), log_(log){};
 
-    void ProcessRx(const EthBuff *buffer, size_t offset);
+    TErr ProcessRx(const EthBuff *buffer, size_t offset);
     void AddEntry(const uint8_t *ip_address, const uint8_t *mac_address);
     const uint8_t *Ip2Mac(const uint8_t *targetIP);
-    void SendRequest(const uint8_t *targetIP);
+    TErr SendRequest(const uint8_t *targetIP);
 
   private:
     CacheEntry cache_[MAX_ENTRIES]; // Array for storing records in the cache
@@ -61,9 +61,9 @@ namespace TCPIP
 
     InterfaceMAC &mac_;
     IPv4 &ip_;
-    InterfaceLogger &log_;
+    InterfaceLogger *log_;
 
-    void SendReply(const ARPInfo &info);
+    TErr SendReply(const ARPInfo &info);
     int FindEntry(const uint8_t *ip_address) const;
   };
 }

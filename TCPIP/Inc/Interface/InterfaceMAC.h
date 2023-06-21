@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "InterfaceBuffer.h"
+#include "TErr.h"
 
 namespace TCPIP
 {
@@ -25,8 +26,8 @@ namespace TCPIP
 
     typedef void (*DataTransmitHandler)(EthBuff *data);
     virtual void RegisterDataTransmitHandler(DataTransmitHandler) = 0;
-    virtual void ProcessRx(const EthBuff *) = 0;
-    virtual void Transmit(EthBuff *buffer, const uint8_t *targetMAC, uint16_t type) = 0;
+    virtual TErr ProcessRx(const EthBuff *) = 0;
+    virtual TErr Transmit(EthBuff *buffer, const uint8_t *targetMAC, uint16_t type) = 0;
 
     virtual EthBuff *GetTxBuffer() = 0;
     virtual size_t GetTxOffset() = 0;

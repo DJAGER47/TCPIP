@@ -8,7 +8,7 @@ namespace TCPIP
   /// @param offset The offset parameter is the starting position of the ICMP packet within the Ethernet buffer.
   /// It is used to locate the ICMP packet within the buffer.
   /// @param sourceIP The source IP address of the received ICMP packet.
-  void ICMP::ProcessRx(const EthBuff *buffer, size_t offset, const uint8_t *sourceIP)
+  TErr ICMP::ProcessRx(const EthBuff *buffer, size_t offset, const uint8_t *sourceIP)
   {
     const uint8_t *packet = buffer->buff + offset;
     ICMPInfo info;
@@ -18,8 +18,11 @@ namespace TCPIP
 
     if (detail::CalculateChecksum(packet, buffer->tot_len - offset))
     {
-      log_.print_log(InterfaceLogger::ERROR, "ICMP: CRC is not correct\n");
-      return;
+      if (log_ != nullptr)
+      {
+        log_->print_log(InterfaceLogger::ERROR, "ICMP: CRC is not correct\n");
+      }
+      return eCRC;
     }
 
     switch (info.type)
@@ -29,8 +32,11 @@ namespace TCPIP
       EthBuff *txBuf = ip_.GetTxBuffer();
       if (txBuf == nullptr)
       {
-        log_.print_log(InterfaceLogger::WARNING, "ICMP: ICMP failed to get tx buffer\n");
-        return;
+        if (log_ != nullptr)
+        {
+          log_->print_log(InterfaceLogger::WARNING, "ICMP: ICMP failed to get tx buffer\n");
+        }
+        return eAlloc;
       }
       size_t offset = ip_.GetTxOffset();
       offset = detail::Pack8(txBuf->buff, offset, Icmp_ER);
@@ -48,8 +54,12 @@ namespace TCPIP
     break;
 
     default:
-      log_.print_log(InterfaceLogger::WARNING, "ICMP: Unsupported ICMP Protocol 0x%02X\n", info.type);
+      if (log_ != nullptr)
+      {
+        log_->print_log(InterfaceLogger::WARNING, "ICMP: Unsupported ICMP Protocol 0x%02X\n", info.type);
+      }
       break;
     }
+    return eOk;
   }
 }

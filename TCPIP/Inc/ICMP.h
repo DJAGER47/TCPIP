@@ -14,8 +14,8 @@ namespace TCPIP
   public:
     ICMP() = delete;
     ICMP(ICMP &) = delete;
-    ICMP(IPv4 &ip, InterfaceLogger &log) : ip_(ip), log_(log){};
-    void ProcessRx(const EthBuff *buffer, size_t offset, const uint8_t* sourceIP);
+    ICMP(IPv4 &ip, InterfaceLogger *log = nullptr) : ip_(ip), log_(log){};
+    TErr ProcessRx(const EthBuff *buffer, size_t offset, const uint8_t* sourceIP);
 
   private:
     enum
@@ -44,6 +44,6 @@ namespace TCPIP
     };
 
     IPv4 &ip_;
-    InterfaceLogger &log_;
+    InterfaceLogger *log_;
   };
 }

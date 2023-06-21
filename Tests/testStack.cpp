@@ -22,11 +22,14 @@ class DefaultStack
 public:
   DefaultStack()
       : log_(),
-        mac_(arp_, ip_, log_),
-        ip_(mac_, arp_, icmp_, log_),
-        arp_(mac_, ip_, log_),
-        icmp_(ip_, log_)
+        mac_(&log_),
+        ip_(mac_, arp_, &log_),
+        arp_(mac_, ip_, &log_),
+        icmp_(ip_, &log_)
   {
+    mac_.SetArpClass(&arp_);
+    mac_.SetIPv4Class(&ip_);
+    ip_.SetIcmpClass(&icmp_);
   }
 
   Logger log_;

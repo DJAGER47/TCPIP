@@ -9,7 +9,7 @@ namespace TCPIP
   /// the type of ARP operation.
   /// @param buffer A pointer to an EthBuff object, which contains the Ethernet frame buffer.
   /// @param offset The offset parameter is the starting position of the ARP packet within the Ethernet buffer.
-  void ARP::ProcessRx(const EthBuff *buffer, size_t offset)
+  TErr ARP::ProcessRx(const EthBuff *buffer, size_t offset)
   {
     ARPInfo info;
     const uint8_t *packet = buffer->buff + offset;
@@ -38,7 +38,10 @@ namespace TCPIP
           // This ARP is for me
           AddEntry(info.SPA, info.SHA);
           SendReply(info);
-          log_.print_log(InterfaceLogger::INFO, "ARP: This ARP is for me\n");
+          if (log_ != nullptr)
+          {
+            log_->print_log(InterfaceLogger::INFO, "ARP: This ARP is for me\n");
+          }
         }
       }
     }
@@ -49,8 +52,12 @@ namespace TCPIP
     }
     else
     {
-      log_.print_log(InterfaceLogger::WARNING, "ARP: ARP OPER = %d\n", info.OPER);
+      if (log_ != nullptr)
+      {
+        log_->print_log(InterfaceLogger::WARNING, "ARP: ARP OPER = %d\n", info.OPER);
+      }
     }
+    return eOk;
   }
 
   /// @brief The function adds an IP-MAC address pair to the ARP cache, updating an existing entry if it
@@ -59,9 +66,12 @@ namespace TCPIP
   /// @param mac_address A pointer to an array of 6 bytes representing the MAC address to be added to the ARP cache.
   void ARP::AddEntry(const uint8_t *ip_address, const uint8_t *mac_address)
   {
-    log_.print_log(InterfaceLogger::INFO, "ARP: %03d.%03d.%03d.%03d <-> %02x:%02x:%02x:%02x:%02x:%02x to cache\n",
-                   ip_address[0], ip_address[1], ip_address[2], ip_address[3],
-                   mac_address[0], mac_address[1], mac_address[2], mac_address[3], mac_address[4], mac_address[5]);
+    if (log_ != nullptr)
+    {
+      log_->print_log(InterfaceLogger::INFO, "ARP: %03d.%03d.%03d.%03d <-> %02x:%02x:%02x:%02x:%02x:%02x to cache\n",
+                     ip_address[0], ip_address[1], ip_address[2], ip_address[3],
+                     mac_address[0], mac_address[1], mac_address[2], mac_address[3], mac_address[4], mac_address[5]);
+    }
     int index = FindEntry(ip_address);
     if (index != -1)
     {
@@ -109,13 +119,16 @@ namespace TCPIP
   /// MAC address.
   /// @param targetIP A pointer to a uint8_t array representing the IP address of the target device to
   /// which an ARP request is being sent.
-  void ARP::SendRequest(const uint8_t *targetIP)
+  TErr ARP::SendRequest(const uint8_t *targetIP)
   {
     EthBuff *txBuf = mac_.GetTxBuffer();
     if (txBuf == nullptr)
     {
-      log_.print_log(InterfaceLogger::WARNING, "ARP: ARP failed to get tx buffer\n");
-      return;
+      if (log_ != nullptr)
+      {
+        log_->print_log(InterfaceLogger::WARNING, "ARP: ARP failed to get tx buffer\n");
+      }
+      return eAlloc;  
     }
     size_t offset = mac_.GetTxOffset();
     offset = detail::Pack16(txBuf->buff, offset, hardwareType);                                       // Hardware Type
@@ -130,6 +143,7 @@ namespace TCPIP
     txBuf->tot_len = txBuf->len = offset;
 
     mac_.Transmit(txBuf, mac_.GetBroadcastAddress(), InterfaceMAC::EtherType::etARP);
+    return eOk;
   }
 
   // private:
@@ -138,13 +152,16 @@ namespace TCPIP
   /// @param info A reference to an ARPInfo struct that contains information about the ARP request that
   /// this reply is in response to. This includes the target's hardware and protocol addresses (SHA and
   /// SPA), as well as the hardware and protocol types and sizes (HTYPE, PTYPE, HLEN, and PLEN).
-  void ARP::SendReply(const ARPInfo &info)
+  TErr ARP::SendReply(const ARPInfo &info)
   {
     EthBuff *txBuf = mac_.GetTxBuffer();
     if (txBuf == nullptr)
     {
-      log_.print_log(InterfaceLogger::WARNING, "ARP: ARP failed to get tx buffer\n");
-      return;
+      if (log_ != nullptr)
+      {
+        log_->print_log(InterfaceLogger::WARNING, "ARP: ARP failed to get tx buffer\n");
+      }
+      return eAlloc;
     }
     size_t offset = mac_.GetTxOffset();
     offset = detail::Pack16(txBuf->buff, offset, info.HTYPE);                             // Hardware Type
@@ -159,6 +176,7 @@ namespace TCPIP
     txBuf->tot_len = txBuf->len = offset;
 
     mac_.Transmit(txBuf, info.SHA, InterfaceMAC::EtherType::etARP);
+    return eOk;
   }
 
   /// @brief The function searches for an entry in an ARP cache based on an IP address and returns its index if

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InterfaceBuffer.h"
+#include "TErr.h"
 
 namespace TCPIP
 {
@@ -20,8 +21,8 @@ namespace TCPIP
 
     virtual ~InterfaceIP(){};
 
-    virtual void ProcessRx(const EthBuff *buffer, size_t offset) = 0;
-    virtual void Transmit(EthBuff *, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP) = 0;
+    virtual TErr ProcessRx(const EthBuff *buffer, size_t offset) = 0;
+    virtual TErr Transmit(EthBuff *buffer, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP) = 0;
 
     virtual EthBuff *GetTxBuffer() = 0;
     virtual size_t GetTxOffset() = 0;

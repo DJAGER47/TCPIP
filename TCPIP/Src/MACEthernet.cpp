@@ -6,8 +6,7 @@ namespace TCPIP
 
   // public:
 
-  MACEthernet::MACEthernet(ARP &arp, InterfaceIP &ipv4, InterfaceLogger &log) : TxHandler(nullptr), arp_(arp),
-                                                                                ipv4_(ipv4), log_(log)
+  MACEthernet::MACEthernet(InterfaceLogger *log) : TxHandler(nullptr), arp_(nullptr), ipv4_(nullptr), log_(log)
   {
     memset(BroadcastAddress, 0xFF, GetAddressSize());
   }
@@ -23,32 +22,51 @@ namespace TCPIP
   /// @brief The function processes incoming Ethernet packets and checks if the MAC address is destined for the
   /// device, then forwards the packet to the appropriate protocol handler based on the packet's type.
   /// @param buffer A pointer to an EthBuff structure, which contains the received Ethernet packet data.
-  void MACEthernet::ProcessRx(const EthBuff *buffer)
+  TErr MACEthernet::ProcessRx(const EthBuff *buffer)
   {
     if (buffer == nullptr)
-      return;
+      return eError;
 
     // Check if the MAC Address is destined for me
     if (IsThisMyAddress(buffer->buff))
     {
-      log_.print_log(InterfaceLogger::INFO, "MAC: Pocket size %d\n", buffer->tot_len);
+      if (log_ != nullptr)
+      {
+        log_->print_log(InterfaceLogger::INFO, "MAC: Pocket size %d\n", buffer->tot_len);
+      }
 
       uint16_t type = detail::Unpack16(buffer->buff, 12);
       switch (type)
       {
       case InterfaceMAC::EtherType::etIPv4:
-        log_.print_log(InterfaceLogger::INFO, "MAC: IPv4\n");
-        ipv4_.ProcessRx(buffer, GetHeaderSize());
+        if (log_ != nullptr)
+        {
+          log_->print_log(InterfaceLogger::INFO, "MAC: IPv4\n");
+        }
+        if (ipv4_ != nullptr)
+        {
+          ipv4_->ProcessRx(buffer, GetHeaderSize());
+        }
         break;
       case InterfaceMAC::EtherType::etARP:
-        log_.print_log(InterfaceLogger::INFO, "MAC: ARP\n");
-        arp_.ProcessRx(buffer, GetHeaderSize());
+        if (log_ != nullptr)
+        {
+          log_->print_log(InterfaceLogger::INFO, "MAC: ARP\n");
+        }
+        if (arp_ != nullptr)
+        {
+          arp_->ProcessRx(buffer, GetHeaderSize());
+        }
         break;
       default:
-        log_.print_log(InterfaceLogger::WARNING, "MAC: Unsupported Unicast type 0x%04X\n", type);
+        if (log_ != nullptr)
+        {
+          log_->print_log(InterfaceLogger::WARNING, "MAC: Unsupported Unicast type 0x%04X\n", type);
+        }
         break;
       }
     }
+    return eOk;
   }
 
   /// @brief The Transmit function packs the target MAC address, source MAC address, and type into a buffer and
@@ -58,7 +76,7 @@ namespace TCPIP
   /// Ethernet frame being transmitted.
   /// @param type The type parameter is a 16-bit unsigned integer that specifies the type of the Ethernet
   /// frame being transmitted. It is used to identify the protocol being used in the payload of the frame.
-  void MACEthernet::Transmit(EthBuff *buffer, const uint8_t *targetMAC, uint16_t type)
+  TErr MACEthernet::Transmit(EthBuff *buffer, const uint8_t *targetMAC, uint16_t type)
   {
     size_t offset = 0;
     offset = detail::PackBytes(buffer->buff, offset, targetMAC, ADDRESS_SIZE);
@@ -68,12 +86,18 @@ namespace TCPIP
     if (buffer->tot_len < (min_payload + HEADER_SIZE))
     {
       memset(buffer->buff + buffer->tot_len, 0, (min_payload + HEADER_SIZE) - buffer->tot_len);
-      buffer->tot_len = buffer->len = min_payload + HEADER_SIZE; 
+      buffer->tot_len = buffer->len = min_payload + HEADER_SIZE;
     }
 
     if (TxHandler)
     {
       TxHandler(buffer);
+      return eOk;
+    }
+    else
+    {
+      Rx_.release(buffer);
+      return eError;
     }
   }
 

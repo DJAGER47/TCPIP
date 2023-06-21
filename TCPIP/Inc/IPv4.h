@@ -47,10 +47,12 @@ namespace TCPIP
 
     IPv4() = delete;
     IPv4(IPv4 &) = delete;
-    IPv4(InterfaceMAC &mac, ARP &arp, ICMP &icmp, InterfaceLogger &log) : PacketID(0), mac_(mac), arp_(arp), icmp_(icmp), log_(log){};
+    IPv4(InterfaceMAC &mac, ARP &arp, InterfaceLogger *log = nullptr) : PacketID(0), mac_(mac), arp_(arp), icmp_(nullptr), log_(log){};
 
-    void ProcessRx(const EthBuff *buffer, size_t offset);
-    void Transmit(EthBuff *, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP);
+    void SetIcmpClass(ICMP *icmp) { icmp_ = icmp; };
+
+    TErr ProcessRx(const EthBuff *buffer, size_t offset);
+    TErr Transmit(EthBuff *buffer, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP);
 
     EthBuff *GetTxBuffer() { return mac_.GetTxBuffer(); };
     size_t GetTxOffset() { return mac_.GetTxOffset() + HEADER_SIZE; };
@@ -70,8 +72,8 @@ namespace TCPIP
 
     InterfaceMAC &mac_;
     ARP &arp_;
-    ICMP &icmp_;
-    InterfaceLogger &log_;
+    ICMP *icmp_;
+    InterfaceLogger *log_;
 
     bool IsThisMyAddress(const uint8_t *addr);
     void calcBroadcastAddress(void);

@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#define ETH_MAX_PACKET_SIZE    (1524U)
+#define ETH_MAX_PACKETS_SIZE (1524U)
 
 namespace TCPIP
 {
@@ -15,10 +15,10 @@ namespace TCPIP
     size_t tot_len;
     // length of this buffer
     size_t len;
-    uint8_t buff[ETH_MAX_PACKET_SIZE];
+    uint8_t buff[ETH_MAX_PACKETS_SIZE];
   };
 
-  static_assert(ETH_MAX_PACKET_SIZE > 255);
+  static_assert(ETH_MAX_PACKETS_SIZE > 255);
 
   class Allocator
   {

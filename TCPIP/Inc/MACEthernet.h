@@ -21,7 +21,10 @@ namespace TCPIP
   public:
     MACEthernet() = delete;
     MACEthernet(MACEthernet &) = delete;
-    MACEthernet(ARP &arp, InterfaceIP &ipv4, InterfaceLogger &log);
+    MACEthernet(InterfaceLogger *log = nullptr);
+
+    void SetArpClass(ARP *arp) { arp_ = arp; };
+    void SetIPv4Class(InterfaceIP *ipv4) { ipv4_ = ipv4; };
 
     uint8_t GetHeaderSize() const { return HEADER_SIZE; };
     uint8_t GetAddressSize() const { return ADDRESS_SIZE; };
@@ -30,8 +33,8 @@ namespace TCPIP
     const uint8_t *GetBroadcastAddress() const { return BroadcastAddress; };
 
     void RegisterDataTransmitHandler(DataTransmitHandler handler) { TxHandler = handler; };
-    void ProcessRx(const EthBuff *buffer);
-    void Transmit(EthBuff *buffer, const uint8_t *targetMAC, uint16_t type);
+    TErr ProcessRx(const EthBuff *buffer);
+    TErr Transmit(EthBuff *buffer, const uint8_t *targetMAC, uint16_t type);
 
     EthBuff *GetTxBuffer() { return Tx_.allocate(); };
     size_t GetTxOffset() { return HEADER_SIZE; };
@@ -48,10 +51,10 @@ namespace TCPIP
     DataTransmitHandler TxHandler;
     stupidAllocator<sizeBuffers> Rx_; // Memory allocator for reception
     stupidAllocator<sizeBuffers> Tx_; // Memory allocator for transmission
-    
-    ARP &arp_;
-    InterfaceIP &ipv4_;
-    InterfaceLogger &log_;
+
+    ARP *arp_;
+    InterfaceIP *ipv4_;
+    InterfaceLogger *log_;
 
     bool IsThisMyAddress(const uint8_t *addr);
   };
