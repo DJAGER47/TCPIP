@@ -13,10 +13,10 @@ public:
   Logger() : mutex_id(osMutexCreate(osMutex(mutex)))
   {
     if (mutex_id == NULL)
-      print_log(InterfaceLogger::ERROR, "osMutexCreate error\n");
+      _printf("osMutexCreate error\n");
   }
 
-  int print_log(Type type, const char *sFormat, ...)
+  int print_log(Type type, const char *sFormat, ...) override
   {
     int r;
     osMutexWait(mutex_id, osWaitForever);

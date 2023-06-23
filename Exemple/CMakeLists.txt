@@ -49,6 +49,7 @@ target_compile_options(${EXECUTABLE} PRIVATE
   # -Werror
   -pedantic
   -Wconversion
+  # -Wpadded
   -ffunction-sections # Каждая функция в отдельной секции в elf
   -fdata-sections     # Каждая переменная в отдельной секции в elf
   -fstack-usage       # Генерирует su файлы для анализа стека

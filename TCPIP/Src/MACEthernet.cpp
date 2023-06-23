@@ -6,7 +6,7 @@ namespace TCPIP
 
   // public:
 
-  MACEthernet::MACEthernet(InterfaceLogger *log) : TxHandler(nullptr), arp_(nullptr), ipv4_(nullptr), log_(log)
+  MACEthernet::MACEthernet(Allocator &Rx, Allocator &Tx, InterfaceLogger *log) : TxHandler(nullptr), Rx_(Rx), Tx_(Tx), arp_(nullptr), ipv4_(nullptr), log_(log)
   {
     memset(BroadcastAddress, 0xFF, GetAddressSize());
   }
@@ -25,7 +25,7 @@ namespace TCPIP
   TErr MACEthernet::ProcessRx(const EthBuff *buffer)
   {
     if (buffer == nullptr)
-      return eError;
+      return TErr::eError;
 
     // Check if the MAC Address is destined for me
     if (IsThisMyAddress(buffer->buff))
@@ -66,7 +66,7 @@ namespace TCPIP
         break;
       }
     }
-    return eOk;
+    return TErr::eOk;
   }
 
   /// @brief The Transmit function packs the target MAC address, source MAC address, and type into a buffer and
@@ -92,12 +92,12 @@ namespace TCPIP
     if (TxHandler)
     {
       TxHandler(buffer);
-      return eOk;
+      return TErr::eOk;
     }
     else
     {
       Rx_.release(buffer);
-      return eError;
+      return TErr::eError;
     }
   }
 

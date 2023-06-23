@@ -6,6 +6,7 @@
 #include "ICMP.h"
 #include "MACEthernet.h"
 #include "Logger.h"
+#include "stupidAllocator.h"
 
 namespace TCPIP
 {
@@ -19,5 +20,7 @@ namespace TCPIP
     IPv4 ip_;
     ARP arp_;
     ICMP icmp_;
+    stupidAllocator<5> Rx_;
+    stupidAllocator<10> Tx_;
   };
 }

@@ -12,7 +12,6 @@ namespace TCPIP
   class MACEthernet : public InterfaceMAC // https://en.wikipedia.org/wiki/Ethernet
   {
   private:
-    static const uint8_t sizeBuffers = 10; // the size of the reception/transmission buffers
     static const uint8_t min_payload = 46; // minimum Ethernet payload size
 
     static const uint8_t HEADER_SIZE = 14; // size MAC header
@@ -21,26 +20,26 @@ namespace TCPIP
   public:
     MACEthernet() = delete;
     MACEthernet(MACEthernet &) = delete;
-    MACEthernet(InterfaceLogger *log = nullptr);
+    MACEthernet(Allocator &Rx, Allocator &Tx, InterfaceLogger *log = nullptr);
 
     void SetArpClass(ARP *arp) { arp_ = arp; };
     void SetIPv4Class(InterfaceIP *ipv4) { ipv4_ = ipv4; };
 
-    uint8_t GetHeaderSize() const { return HEADER_SIZE; };
-    uint8_t GetAddressSize() const { return ADDRESS_SIZE; };
+    uint8_t GetHeaderSize() const override { return HEADER_SIZE; };
+    uint8_t GetAddressSize() const override { return ADDRESS_SIZE; };
 
-    const uint8_t *GetUnicastAddress() const { return UnicastAddress; };
-    const uint8_t *GetBroadcastAddress() const { return BroadcastAddress; };
+    const uint8_t *GetUnicastAddress() const override { return UnicastAddress; };
+    const uint8_t *GetBroadcastAddress() const override { return BroadcastAddress; };
 
-    void RegisterDataTransmitHandler(DataTransmitHandler handler) { TxHandler = handler; };
-    TErr ProcessRx(const EthBuff *buffer);
-    TErr Transmit(EthBuff *buffer, const uint8_t *targetMAC, uint16_t type);
+    void RegisterDataTransmitHandler(DataTransmitHandler handler) override { TxHandler = handler; };
+    TErr ProcessRx(const EthBuff *buffer) override;
+    TErr Transmit(EthBuff *buffer, const uint8_t *targetMAC, uint16_t type) override;
 
-    EthBuff *GetTxBuffer() { return Tx_.allocate(); };
-    size_t GetTxOffset() { return HEADER_SIZE; };
-    EthBuff *GetRxBuffer() { return Rx_.allocate(); };
-    void FreeTxBuffer(EthBuff *p) { return Tx_.release(p); };
-    void FreeRxBuffer(EthBuff *p) { return Rx_.release(p); };
+    EthBuff *GetTxBuffer() override { return Tx_.allocate(); };
+    size_t GetTxOffset() override { return HEADER_SIZE; };
+    EthBuff *GetRxBuffer() override { return Rx_.allocate(); };
+    void FreeTxBuffer(EthBuff *p) override { return Tx_.release(p); };
+    void FreeRxBuffer(EthBuff *p) override { return Rx_.release(p); };
 
     void SetUnicastAddress(const uint8_t *addr);
 
@@ -49,8 +48,8 @@ namespace TCPIP
     uint8_t BroadcastAddress[ADDRESS_SIZE];
 
     DataTransmitHandler TxHandler;
-    stupidAllocator<sizeBuffers> Rx_; // Memory allocator for reception
-    stupidAllocator<sizeBuffers> Tx_; // Memory allocator for transmission
+    Allocator &Rx_; // Memory allocator for reception
+    Allocator &Tx_; // Memory allocator for transmission
 
     ARP *arp_;
     InterfaceIP *ipv4_;

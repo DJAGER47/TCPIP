@@ -23,7 +23,7 @@ namespace TCPIP
   class Allocator
   {
   public:
-    ~Allocator(){};
+    virtual ~Allocator(){};
     virtual void release(EthBuff *ptr) = 0;
     virtual EthBuff *allocate() = 0;
   };

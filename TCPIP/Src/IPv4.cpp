@@ -33,7 +33,7 @@ namespace TCPIP
       {
         log_->print_log(InterfaceLogger::ERROR, "IPv4: CRC is not correct\n");
       }
-      return eCRC;
+      return TErr::eCRC;
     }
 
     if (IsThisMyAddress(head.targetIP))
@@ -59,7 +59,7 @@ namespace TCPIP
         break;
       }
     }
-    return eOk;
+    return TErr::eOk;
   }
 
   /// @brief The Transmit function sends an IPv4 packet with a specified protocol, target IP, and source IP using Ethernet.
@@ -98,7 +98,7 @@ namespace TCPIP
         log_->print_log(InterfaceLogger::WARNING, "IPv4: Can't send it, don't know MAC\n");
       }
     }
-    return eOk;
+    return TErr::eOk;
   }
 
   /// @brief The function sets the IPv4 address information and calculates the broadcast address.

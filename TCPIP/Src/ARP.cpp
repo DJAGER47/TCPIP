@@ -57,7 +57,7 @@ namespace TCPIP
         log_->print_log(InterfaceLogger::WARNING, "ARP: ARP OPER = %d\n", info.OPER);
       }
     }
-    return eOk;
+    return TErr::eOk;
   }
 
   /// @brief The function adds an IP-MAC address pair to the ARP cache, updating an existing entry if it
@@ -128,7 +128,7 @@ namespace TCPIP
       {
         log_->print_log(InterfaceLogger::WARNING, "ARP: ARP failed to get tx buffer\n");
       }
-      return eAlloc;  
+      return TErr::eAlloc;  
     }
     size_t offset = mac_.GetTxOffset();
     offset = detail::Pack16(txBuf->buff, offset, hardwareType);                                       // Hardware Type
@@ -143,7 +143,7 @@ namespace TCPIP
     txBuf->tot_len = txBuf->len = offset;
 
     mac_.Transmit(txBuf, mac_.GetBroadcastAddress(), InterfaceMAC::EtherType::etARP);
-    return eOk;
+    return TErr::eOk;
   }
 
   // private:
@@ -161,7 +161,7 @@ namespace TCPIP
       {
         log_->print_log(InterfaceLogger::WARNING, "ARP: ARP failed to get tx buffer\n");
       }
-      return eAlloc;
+      return TErr::eAlloc;
     }
     size_t offset = mac_.GetTxOffset();
     offset = detail::Pack16(txBuf->buff, offset, info.HTYPE);                             // Hardware Type
@@ -176,7 +176,7 @@ namespace TCPIP
     txBuf->tot_len = txBuf->len = offset;
 
     mac_.Transmit(txBuf, info.SHA, InterfaceMAC::EtherType::etARP);
-    return eOk;
+    return TErr::eOk;
   }
 
   /// @brief The function searches for an entry in an ARP cache based on an IP address and returns its index if

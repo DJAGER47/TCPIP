@@ -9,6 +9,7 @@
 #include "ARP.h"
 #include "IPv4.h"
 #include "ICMP.h"
+#include "stupidAllocator.h"
 
 using namespace TCPIP;
 
@@ -22,7 +23,7 @@ class DefaultStack
 public:
   DefaultStack()
       : log_(),
-        mac_(&log_),
+        mac_(Rx_, Tx_, &log_),
         ip_(mac_, arp_, &log_),
         arp_(mac_, ip_, &log_),
         icmp_(ip_, &log_)
@@ -37,6 +38,8 @@ public:
   IPv4 ip_;
   ARP arp_;
   ICMP icmp_;
+  stupidAllocator<5> Rx_;
+  stupidAllocator<10> Tx_;
 };
 
 void writeMAC(TCPIP::EthBuff *data)

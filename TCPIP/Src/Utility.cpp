@@ -66,9 +66,7 @@ namespace TCPIP
 
     bool AddressCompare(const uint8_t *a1, const uint8_t *a2, int length)
     {
-      if (memcmp(a1, a2, length) == 0)
-        return true;
-      return false;
+      return (memcmp(a1, a2, length) == 0);
     }
 
     /// @brief ICMP, IPv4

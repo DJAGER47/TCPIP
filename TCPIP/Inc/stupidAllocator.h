@@ -18,7 +18,7 @@ namespace TCPIP
         isFree[i] = true;
     };
 
-    void release(EthBuff *ptr)
+    void release(EthBuff *ptr) override
     {
       if (ptr->next != nullptr)
         release(ptr->next);
@@ -33,7 +33,7 @@ namespace TCPIP
       }
     }
 
-    EthBuff *allocate()
+    EthBuff *allocate() override
     {
       for (size_t i = 0; i < length; ++i)
       {
@@ -44,6 +44,11 @@ namespace TCPIP
         }
       }
       return nullptr;
+    }
+
+    size_t capacity()
+    {
+      return length;
     }
 
   private:

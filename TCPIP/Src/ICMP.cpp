@@ -22,7 +22,7 @@ namespace TCPIP
       {
         log_->print_log(InterfaceLogger::ERROR, "ICMP: CRC is not correct\n");
       }
-      return eCRC;
+      return TErr::eCRC;
     }
 
     switch (info.type)
@@ -36,7 +36,7 @@ namespace TCPIP
         {
           log_->print_log(InterfaceLogger::WARNING, "ICMP: ICMP failed to get tx buffer\n");
         }
-        return eAlloc;
+        return TErr::eAlloc;
       }
       size_t offset = ip_.GetTxOffset();
       offset = detail::Pack8(txBuf->buff, offset, Icmp_ER);
@@ -60,6 +60,6 @@ namespace TCPIP
       }
       break;
     }
-    return eOk;
+    return TErr::eOk;
   }
 }

@@ -2,11 +2,11 @@
 
 namespace TCPIP
 {
-  typedef enum 
+  enum class TErr
   {
     eOk = 0,
     eError,
     eAlloc,
     eCRC
-  }TErr;
+  };
 }

@@ -51,17 +51,17 @@ namespace TCPIP
 
     void SetIcmpClass(ICMP *icmp) { icmp_ = icmp; };
 
-    TErr ProcessRx(const EthBuff *buffer, size_t offset);
-    TErr Transmit(EthBuff *buffer, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP);
+    TErr ProcessRx(const EthBuff *buffer, size_t offset) override;
+    TErr Transmit(EthBuff *buffer, uint8_t protocol, const uint8_t *targetIP, const uint8_t *sourceIP) override;
 
-    EthBuff *GetTxBuffer() { return mac_.GetTxBuffer(); };
-    size_t GetTxOffset() { return mac_.GetTxOffset() + HEADER_SIZE; };
-    uint8_t GetHeaderSize() const { return HEADER_SIZE; }
-    uint8_t GetAddressSize() const { return ADDRESS_SIZE; }
-    const uint8_t *GetUnicastAddress() const { return address_.Address; }
-    const uint8_t *GetBroadcastAddress() const { return Broadcast; }
-    const uint8_t *GetGatewayAddress() const { return address_.Gateway; }
-    const uint8_t *GetSubnetMask() const { return address_.SubnetMask; }
+    EthBuff *GetTxBuffer() override { return mac_.GetTxBuffer(); } ;
+    size_t GetTxOffset() override { return mac_.GetTxOffset() + HEADER_SIZE; };
+    uint8_t GetHeaderSize() const override { return HEADER_SIZE; }
+    uint8_t GetAddressSize() const override { return ADDRESS_SIZE; }
+    const uint8_t *GetUnicastAddress() const override { return address_.Address; }
+    const uint8_t *GetBroadcastAddress() const override { return Broadcast; }
+    const uint8_t *GetGatewayAddress() const override { return address_.Gateway; }
+    const uint8_t *GetSubnetMask() const override { return address_.SubnetMask; }
 
     void SetAddressInfo(const AddressIP4Settings &info);
 
